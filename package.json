@@ -1,0 +1,54 @@
+{
+  "name": "mural-mcp",
+  "version": "0.0.1",
+  "description": "Model Context Protocol server for Mural visual collaboration platform",
+  "type": "module",
+  "main": "build/index.js",
+  "bin": {
+    "mural-mcp": "./build/index.js"
+  },
+  "scripts": {
+    "build": "tsc && chmod +x build/index.js",
+    "dev": "tsc --watch",
+    "start": "node build/index.js",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "prepublishOnly": "npm run build"
+  },
+  "keywords": [
+    "mcp",
+    "mural",
+    "visual-collaboration",
+    "model-context-protocol",
+    "ai",
+    "llm",
+    "oauth"
+  ],
+  "author": "",
+  "license": "MIT",
+  "homepage": "https://github.com/your-username/mural-mcp#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/your-username/mural-mcp.git"
+  },
+  "bugs": {
+    "url": "https://github.com/your-username/mural-mcp/issues"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "packageManager": "pnpm@10.12.1",
+  "files": [
+    "build",
+    "README.md",
+    "LICENSE"
+  ],
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.17.1",
+    "dotenv": "^17.2.1",
+    "zod": "^4.0.14"
+  },
+  "devDependencies": {
+    "@types/node": "^24.2.0",
+    "typescript": "^5.9.2"
+  }
+}
