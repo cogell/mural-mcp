@@ -138,8 +138,9 @@ export class MuralClient {
     const endpoint = `/workspaces${queryString ? `?${queryString}` : ''}`;
 
     try {
-      const response = await this.makeAuthenticatedRequest<MuralWorkspacesResponse>(endpoint);
-      return response.data || [];
+      const response = await this.makeAuthenticatedRequest<any>(endpoint);
+      // The API returns workspaces in a "value" property
+      return response.value && Array.isArray(response.value) ? response.value : [];
     } catch (error) {
       console.error('Failed to fetch workspaces:', error);
       throw error;
@@ -208,7 +209,10 @@ export class MuralClient {
 
       return {
         request: debugInfo,
-        response: responseData,
+        response: {
+          value: responseData,
+          raw: responseData
+        },
         success: response.ok
       };
     } catch (error) {
