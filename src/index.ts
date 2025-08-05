@@ -102,6 +102,15 @@ async function main() {
             properties: {},
             additionalProperties: false
           },
+        },
+        {
+          name: 'debug-api-response',
+          description: 'Debug tool: Show raw API response from workspaces endpoint for troubleshooting',
+          inputSchema: {
+            type: 'object',
+            properties: {},
+            additionalProperties: false
+          },
         }
       ],
     };
@@ -183,6 +192,22 @@ async function main() {
                 type: 'text',
                 text: JSON.stringify({
                   message: 'Authentication tokens cleared. You will need to re-authenticate on the next API call.'
+                }, null, 2)
+              }
+            ],
+          };
+        }
+
+        case 'debug-api-response': {
+          const debugInfo = await muralClient.debugWorkspacesAPI();
+          
+          return {
+            content: [
+              {
+                type: 'text',
+                text: JSON.stringify({
+                  debug: debugInfo,
+                  message: 'Raw API response data for troubleshooting'
                 }, null, 2)
               }
             ],

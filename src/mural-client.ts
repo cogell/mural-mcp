@@ -97,4 +97,46 @@ export class MuralClient {
   async clearAuthentication(): Promise<void> {
     await this.oauth.clearTokens();
   }
+
+  async debugWorkspacesAPI(): Promise<any> {
+    const accessToken = await this.oauth.getValidAccessToken();
+    
+    const url = `${this.baseUrl}/workspaces`;
+    const headers = {
+      'Authorization': `Bearer ${accessToken}`,
+      'Accept': 'application/json',
+      'Content-Type': 'application/json'
+    };
+
+    try {
+      const response = await fetch(url, { headers });
+      
+      const debugInfo = {
+        url,
+        status: response.status,
+        statusText: response.statusText,
+        headers: Object.fromEntries(response.headers.entries()),
+        timestamp: new Date().toISOString()
+      };
+
+      let responseData;
+      try {
+        responseData = await response.json();
+      } catch (e) {
+        responseData = await response.text();
+      }
+
+      return {
+        request: debugInfo,
+        response: responseData,
+        success: response.ok
+      };
+    } catch (error) {
+      return {
+        request: { url, headers: { ...headers, Authorization: '[REDACTED]' } },
+        error: error instanceof Error ? error.message : 'Unknown error',
+        success: false
+      };
+    }
+  }
 }
