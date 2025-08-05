@@ -1,56 +1,128 @@
-import type { MuralWorkspace, MuralWorkspacesResponse } from './types.js';
+import type { MuralWorkspace, MuralWorkspacesResponse, RateLimitConfig } from './types.js';
 import { MuralOAuth } from './oauth.js';
+import { MuralRateLimiter } from './rate-limiter.js';
 
 const MURAL_API_BASE = 'https://app.mural.co/api/public/v1';
 
 export class MuralClient {
   private oauth: MuralOAuth;
   private baseUrl: string;
+  private rateLimiter: MuralRateLimiter;
 
-  constructor(clientId: string, clientSecret?: string, redirectUri?: string) {
+  constructor(clientId: string, clientSecret?: string, redirectUri?: string, rateLimitConfig?: Partial<RateLimitConfig>) {
     this.oauth = new MuralOAuth(clientId, clientSecret, redirectUri);
     this.baseUrl = MURAL_API_BASE;
+    this.rateLimiter = new MuralRateLimiter(rateLimitConfig);
   }
 
   private async makeAuthenticatedRequest<T>(
     endpoint: string,
-    options: RequestInit = {}
+    options: RequestInit = {},
+    maxRetries: number = 3
   ): Promise<T> {
-    const accessToken = await this.oauth.getValidAccessToken();
-    
-    const url = `${this.baseUrl}${endpoint}`;
-    const headers = {
-      'Authorization': `Bearer ${accessToken}`,
-      'Accept': 'application/json',
-      'Content-Type': 'application/json',
-      ...options.headers
-    };
-
-    const response = await fetch(url, {
-      ...options,
-      headers
-    });
-
-    if (!response.ok) {
-      let errorMessage = `HTTP ${response.status}: ${response.statusText}`;
-      
-      try {
-        const errorData = await response.json();
-        if (errorData.message) {
-          errorMessage += ` - ${errorData.message}`;
+    for (let attempt = 0; attempt <= maxRetries; attempt++) {
+      // Check rate limits before making request
+      const rateLimitCheck = await this.rateLimiter.canMakeRequest();
+      if (!rateLimitCheck.allowed) {
+        if (rateLimitCheck.waitTimeMs && rateLimitCheck.waitTimeMs <= 5000) {
+          // If wait time is reasonable (≤5s), wait and retry
+          console.warn(`Rate limit hit: ${rateLimitCheck.reason}. Waiting ${rateLimitCheck.waitTimeMs}ms...`);
+          await new Promise(resolve => setTimeout(resolve, rateLimitCheck.waitTimeMs!));
+          continue;
+        } else {
+          // If wait time is too long or not available, throw error
+          throw new Error(`Rate limit exceeded: ${rateLimitCheck.reason}`);
         }
-        if (errorData.errors && Array.isArray(errorData.errors)) {
-          errorMessage += ` - ${errorData.errors.join(', ')}`;
-        }
-      } catch {
-        // If error response isn't JSON, use status text
       }
 
-      throw new Error(`Mural API request failed: ${errorMessage}`);
+      // Consume rate limit token
+      const consumed = await this.rateLimiter.consumeRequest();
+      if (!consumed) {
+        throw new Error('Failed to consume rate limit token');
+      }
+
+      try {
+        const accessToken = await this.oauth.getValidAccessToken();
+        
+        const url = `${this.baseUrl}${endpoint}`;
+        const headers = {
+          'Authorization': `Bearer ${accessToken}`,
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+          ...options.headers
+        };
+
+        const response = await fetch(url, {
+          ...options,
+          headers
+        });
+
+        // Handle rate limit responses from the API
+        if (response.status === 429) {
+          const retryAfter = response.headers.get('Retry-After');
+          const waitTime = retryAfter ? parseInt(retryAfter) * 1000 : Math.pow(2, attempt) * 1000;
+          
+          if (attempt < maxRetries && waitTime <= 30000) {
+            console.warn(`API rate limit hit (HTTP 429). Retrying after ${waitTime}ms... (attempt ${attempt + 1}/${maxRetries + 1})`);
+            await new Promise(resolve => setTimeout(resolve, waitTime));
+            continue;
+          } else {
+            throw new Error(`API rate limit exceeded (HTTP 429). Max retries reached or wait time too long.`);
+          }
+        }
+
+        if (!response.ok) {
+          let errorMessage = `HTTP ${response.status}: ${response.statusText}`;
+          
+          try {
+            const errorData = await response.json();
+            if (errorData.message) {
+              errorMessage += ` - ${errorData.message}`;
+            }
+            if (errorData.errors && Array.isArray(errorData.errors)) {
+              errorMessage += ` - ${errorData.errors.join(', ')}`;
+            }
+          } catch {
+            // If error response isn't JSON, use status text
+          }
+
+          // Don't retry on client errors (4xx except 429) or auth errors
+          if (response.status >= 400 && response.status < 500 && response.status !== 429) {
+            throw new Error(`Mural API request failed: ${errorMessage}`);
+          }
+
+          // Retry on server errors (5xx) with exponential backoff
+          if (attempt < maxRetries && response.status >= 500) {
+            const backoffTime = Math.pow(2, attempt) * 1000;
+            console.warn(`Server error (${response.status}). Retrying after ${backoffTime}ms... (attempt ${attempt + 1}/${maxRetries + 1})`);
+            await new Promise(resolve => setTimeout(resolve, backoffTime));
+            continue;
+          }
+
+          throw new Error(`Mural API request failed: ${errorMessage}`);
+        }
+
+        const data = await response.json();
+        return data as T;
+        
+      } catch (error) {
+        // If it's our last attempt or a non-retryable error, throw
+        if (attempt === maxRetries || error instanceof Error && (
+          error.message.includes('Rate limit exceeded') ||
+          error.message.includes('authentication') ||
+          error.message.includes('authorization')
+        )) {
+          throw error;
+        }
+
+        // Otherwise, wait and retry with exponential backoff
+        const backoffTime = Math.pow(2, attempt) * 1000;
+        console.warn(`Request failed: ${error}. Retrying after ${backoffTime}ms... (attempt ${attempt + 1}/${maxRetries + 1})`);
+        await new Promise(resolve => setTimeout(resolve, backoffTime));
+      }
     }
 
-    const data = await response.json();
-    return data as T;
+    throw new Error('Max retries exceeded');
   }
 
   async getWorkspaces(limit?: number, offset?: number): Promise<MuralWorkspace[]> {
@@ -96,6 +168,14 @@ export class MuralClient {
 
   async clearAuthentication(): Promise<void> {
     await this.oauth.clearTokens();
+  }
+
+  async getRateLimitStatus() {
+    return await this.rateLimiter.getRateLimitStatus();
+  }
+
+  async resetRateLimits(): Promise<void> {
+    await this.rateLimiter.reset();
   }
 
   async debugWorkspacesAPI(): Promise<any> {

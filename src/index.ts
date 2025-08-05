@@ -111,6 +111,15 @@ async function main() {
             properties: {},
             additionalProperties: false
           },
+        },
+        {
+          name: 'get-rate-limit-status',
+          description: 'Get current rate limiting status including remaining tokens and refresh times',
+          inputSchema: {
+            type: 'object',
+            properties: {},
+            additionalProperties: false
+          },
         }
       ],
     };
@@ -208,6 +217,26 @@ async function main() {
                 text: JSON.stringify({
                   debug: debugInfo,
                   message: 'Raw API response data for troubleshooting'
+                }, null, 2)
+              }
+            ],
+          };
+        }
+
+        case 'get-rate-limit-status': {
+          const rateLimitStatus = await muralClient.getRateLimitStatus();
+          
+          return {
+            content: [
+              {
+                type: 'text',
+                text: JSON.stringify({
+                  rateLimits: rateLimitStatus,
+                  message: 'Current rate limiting status',
+                  explanation: {
+                    user: `${rateLimitStatus.user.tokensRemaining}/${rateLimitStatus.user.capacity} requests available (${rateLimitStatus.user.refillRate}/second)`,
+                    app: `${rateLimitStatus.app.tokensRemaining}/${rateLimitStatus.app.capacity} requests available (${rateLimitStatus.app.refillRate}/minute)`
+                  }
                 }, null, 2)
               }
             ],

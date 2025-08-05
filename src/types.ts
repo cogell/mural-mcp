@@ -61,3 +61,39 @@ export interface RefreshTokenParams {
   refresh_token: string;
   grant_type: string;
 }
+
+export interface RateLimitBucket {
+  capacity: number;
+  tokens: number;
+  refillRate: number;
+  lastRefill: number;
+  refillIntervalMs: number;
+}
+
+export interface RateLimitState {
+  userBucket: RateLimitBucket;
+  appBucket: RateLimitBucket;
+  lastUpdated: number;
+}
+
+export interface RateLimitConfig {
+  userRequestsPerSecond: number;
+  appRequestsPerMinute: number;
+  persistState: boolean;
+}
+
+export interface RateLimitStatus {
+  user: {
+    tokensRemaining: number;
+    capacity: number;
+    refillRate: number;
+    nextRefillIn: number;
+  };
+  app: {
+    tokensRemaining: number;
+    capacity: number;
+    refillRate: number;
+    nextRefillIn: number;
+  };
+  lastUpdated: number;
+}
