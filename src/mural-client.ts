@@ -541,7 +541,7 @@ export class MuralClient {
 
       const response = await this.makeAuthenticatedRequest<any>(`/murals/${encodeURIComponent(muralId)}/widgets/sticky-note`, {
         method: 'POST',
-        body: JSON.stringify({ widgets: stickyNotes })
+        body: JSON.stringify(stickyNotes)
       });
 
       return response.value || response || [];

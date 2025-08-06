@@ -382,6 +382,7 @@ export interface CreateStickyNoteRequest {
   x: number;
   y: number;
   text: string;
+  shape: 'rectangle'; // Required field for sticky notes
   width?: number;
   height?: number;
   style?: WidgetTextStyle;

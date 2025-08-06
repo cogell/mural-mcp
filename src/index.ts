@@ -828,7 +828,14 @@ async function main() {
           });
           
           const { muralId, stickyNotes } = schema.parse(args);
-          const createdWidgets = await muralClient.createStickyNotes(muralId, stickyNotes);
+          
+          // Add required shape field to each sticky note
+          const stickyNotesWithShape = stickyNotes.map(note => ({
+            ...note,
+            shape: 'rectangle' as const
+          }));
+          
+          const createdWidgets = await muralClient.createStickyNotes(muralId, stickyNotesWithShape);
           
           return {
             content: [
