@@ -28,11 +28,12 @@ export class MuralOAuth {
     redirectUri = 'http://localhost:3000/callback',
     scopes = [
       'workspaces:read',
-      'workspaces:write',
       'rooms:read', 
       'rooms:write',
       'murals:read',
       'murals:write',
+      'templates:read',
+      'templates:write',
       'identity:read'
     ]
   ) {

@@ -387,18 +387,19 @@ async function main() {
                     : `User has ${scopes.length} OAuth scope${scopes.length === 1 ? '' : 's'}`,
                   recommendations: {
                     'workspaces:read': scopes.includes('workspaces:read') ? 'Required for listing workspaces (✓ available)' : 'Required for listing workspaces (✗ missing)',
-                    'workspaces:write': scopes.includes('workspaces:write') ? 'Required for creating/modifying workspaces (✓ available)' : 'Required for creating/modifying workspaces (✗ missing)',
                     'rooms:read': scopes.includes('rooms:read') ? 'Required for listing rooms (✓ available)' : 'Required for listing rooms (✗ missing)',
                     'rooms:write': scopes.includes('rooms:write') ? 'Required for creating/modifying rooms (✓ available)' : 'Required for creating/modifying rooms (✗ missing)',
                     'murals:read': scopes.includes('murals:read') ? 'Required for reading boards/murals (✓ available)' : 'Required for reading boards/murals (✗ missing)',
                     'murals:write': scopes.includes('murals:write') ? 'Required for creating/modifying boards/murals (✓ available)' : 'Required for creating/modifying boards/murals (✗ missing)',
+                    'templates:read': scopes.includes('templates:read') ? 'Required for reading templates (✓ available)' : 'Required for reading templates (✗ missing)',
+                    'templates:write': scopes.includes('templates:write') ? 'Required for creating/modifying templates (✓ available)' : 'Required for creating/modifying templates (✗ missing)',
                     'identity:read': scopes.includes('identity:read') ? 'Required for user info (✓ available)' : 'Required for user info (✗ missing)'
                   },
                   nextSteps: scopes.length === 0 
                     ? ['Run clear-auth tool', 'Update your Mural app to include all required scopes', 'Re-authenticate when prompted']
-                    : (scopes.includes('murals:read') && scopes.includes('murals:write') && scopes.includes('workspaces:read') && scopes.includes('rooms:read'))
-                      ? ['You have comprehensive scopes for full workspace/room/board operations'] 
-                      : ['Add missing scopes to your Mural app: workspaces:read, workspaces:write, rooms:read, rooms:write, murals:read, murals:write, identity:read', 'Run clear-auth tool', 'Re-authenticate to get new scopes']
+                    : (scopes.includes('murals:read') && scopes.includes('murals:write') && scopes.includes('workspaces:read') && scopes.includes('rooms:read') && scopes.includes('rooms:write') && scopes.includes('templates:read'))
+                      ? ['You have comprehensive scopes for full workspace/room/board/template operations'] 
+                      : ['Add missing scopes to your Mural app: workspaces:read, rooms:read, rooms:write, murals:read, murals:write, templates:read, templates:write, identity:read', 'Run clear-auth tool', 'Re-authenticate to get new scopes']
                 }, null, 2)
               }
             ],
