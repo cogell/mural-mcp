@@ -218,42 +218,42 @@ export interface TimerStatus {
 Add methods to `MuralClient` class for reading content:
 
 ```typescript
-// Widget operations
-async getMuralWidgets(muralId: string): Promise<MuralWidget[]>
-async getMuralWidget(muralId: string, widgetId: string): Promise<MuralWidget>
+// Widget operations - RESTful endpoints
+async getMuralWidgets(muralId: string): Promise<MuralWidget[]>        // GET /murals/{muralId}/widgets
+async getMuralWidget(muralId: string, widgetId: string): Promise<MuralWidget>  // GET /murals/{muralId}/widgets/{widgetId}
 
-// Chat and tags  
-async getMuralChat(muralId: string): Promise<MuralChatMessage[]>
-async getMuralTags(muralId: string): Promise<MuralTag[]>
+// Chat and tags - RESTful endpoints
+async getMuralChat(muralId: string): Promise<MuralChatMessage[]>      // GET /murals/{muralId}/chat
+async getMuralTags(muralId: string): Promise<MuralTag[]>              // GET /murals/{muralId}/tags
 
-// Interactive features
-async getVotingSession(muralId: string, sessionId: string): Promise<VotingSession>
-async getTimer(muralId: string): Promise<TimerStatus>
+// Interactive features - RESTful endpoints
+async getVotingSession(muralId: string, sessionId: string): Promise<VotingSession>  // GET /murals/{muralId}/voting-sessions/{sessionId}
+async getTimer(muralId: string): Promise<TimerStatus>                 // GET /murals/{muralId}/timer
 ```
 
 #### 2.2 Content Creation Methods
 
 ```typescript
-// Widget creation
-async createStickyNotes(muralId: string, stickyNotes: Partial<StickyNoteWidget>[]): Promise<StickyNoteWidget[]>
-async createTextBoxes(muralId: string, textBoxes: Partial<TextBoxWidget>[]): Promise<TextBoxWidget[]>
-async createTitles(muralId: string, titles: Partial<TitleWidget>[]): Promise<TitleWidget[]>
-async createShapes(muralId: string, shapes: Partial<ShapeWidget>[]): Promise<ShapeWidget[]>
-async createImages(muralId: string, images: Partial<ImageWidget>[]): Promise<ImageWidget[]>
-async createFiles(muralId: string, files: Partial<FileWidget>[]): Promise<FileWidget[]>
-async createTables(muralId: string, tables: Partial<TableWidget>[]): Promise<TableWidget[]>
-async createAreas(muralId: string, areas: Partial<AreaWidget>[]): Promise<AreaWidget[]>
-async createArrows(muralId: string, arrows: Partial<ArrowWidget>[]): Promise<ArrowWidget[]>
-async createComments(muralId: string, comments: Partial<MuralComment>[]): Promise<MuralComment[]>
+// Widget creation - RESTful endpoints
+async createStickyNotes(muralId: string, stickyNotes: Partial<StickyNoteWidget>[]): Promise<StickyNoteWidget[]>  // POST /murals/{muralId}/widgets/sticky-note
+async createTextBoxes(muralId: string, textBoxes: Partial<TextBoxWidget>[]): Promise<TextBoxWidget[]>            // POST /murals/{muralId}/widgets/text-box
+async createTitles(muralId: string, titles: Partial<TitleWidget>[]): Promise<TitleWidget[]>                      // POST /murals/{muralId}/widgets/title
+async createShapes(muralId: string, shapes: Partial<ShapeWidget>[]): Promise<ShapeWidget[]>                      // POST /murals/{muralId}/widgets/shape
+async createImages(muralId: string, images: Partial<ImageWidget>[]): Promise<ImageWidget[]>                      // POST /murals/{muralId}/widgets/image
+async createFiles(muralId: string, files: Partial<FileWidget>[]): Promise<FileWidget[]>                          // POST /murals/{muralId}/widgets/file
+async createTables(muralId: string, tables: Partial<TableWidget>[]): Promise<TableWidget[]>                      // POST /murals/{muralId}/widgets/table
+async createAreas(muralId: string, areas: Partial<AreaWidget>[]): Promise<AreaWidget[]>                          // POST /murals/{muralId}/widgets/area
+async createArrows(muralId: string, arrows: Partial<ArrowWidget>[]): Promise<ArrowWidget[]>                      // POST /murals/{muralId}/widgets/arrow
+async createComments(muralId: string, comments: Partial<MuralComment>[]): Promise<MuralComment[]>                // POST /murals/{muralId}/comments
 
-// Tags and interactive features
-async createMuralTag(muralId: string, tag: Partial<MuralTag>): Promise<MuralTag>
-async startVotingSession(muralId: string, name: string, widgetIds: string[]): Promise<VotingSession>
-async startTimer(muralId: string, duration: number): Promise<TimerStatus>
+// Tags and interactive features - RESTful endpoints
+async createMuralTag(muralId: string, tag: Partial<MuralTag>): Promise<MuralTag>                                 // POST /murals/{muralId}/tags
+async startVotingSession(muralId: string, sessionData: CreateVotingSessionRequest): Promise<VotingSession>       // POST /murals/{muralId}/voting-sessions
+async startTimer(muralId: string, timerData: StartTimerRequest): Promise<TimerStatus>                           // POST /murals/{muralId}/timer
 
-// Content management
-async deleteWidget(muralId: string, widgetId: string): Promise<void>
-async updateMuralVisitorSettings(muralId: string, settings: any): Promise<void>
+// Content management - RESTful endpoints
+async deleteWidget(muralId: string, widgetId: string): Promise<void>                                             // DELETE /murals/{muralId}/widgets/{widgetId}
+async updateMuralVisitorSettings(muralId: string, settings: MuralVisitorSettings): Promise<void>                // PATCH /murals/{muralId}/visitor-settings
 ```
 
 #### 2.3 Implementation Details
@@ -262,7 +262,7 @@ Each method will:
 1. Validate required OAuth scopes (`murals:read` or `murals:write`)
 2. Use existing rate limiting and retry mechanisms
 3. Handle API-specific error responses
-4. Support both RESTful and legacy endpoint formats where available
+4. Use consistent RESTful endpoint patterns following `/murals/{muralId}/{resource}` structure
 5. Maintain consistent error handling patterns
 
 ### Phase 3: MCP Tool Registration

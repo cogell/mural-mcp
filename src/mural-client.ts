@@ -438,7 +438,7 @@ export class MuralClient {
         throw new Error(`Permission denied: ${scopeCheck.message}. Please ensure your Mural OAuth app has 'murals:read' scope and re-authenticate.`);
       }
 
-      const response = await this.makeAuthenticatedRequest<any>(`/getmuralwidgets?muralId=${encodeURIComponent(muralId)}`);
+      const response = await this.makeAuthenticatedRequest<any>(`/murals/${encodeURIComponent(muralId)}/widgets`);
       const widgets = response.value || response.widgets || response;
       return Array.isArray(widgets) ? widgets : [];
     } catch (error) {
@@ -454,7 +454,7 @@ export class MuralClient {
         throw new Error(`Permission denied: ${scopeCheck.message}. Please ensure your Mural OAuth app has 'murals:read' scope and re-authenticate.`);
       }
 
-      const response = await this.makeAuthenticatedRequest<MuralWidget>(`/getmuralwidget?muralId=${encodeURIComponent(muralId)}&widgetId=${encodeURIComponent(widgetId)}`);
+      const response = await this.makeAuthenticatedRequest<MuralWidget>(`/murals/${encodeURIComponent(muralId)}/widgets/${encodeURIComponent(widgetId)}`);
       return response;
     } catch (error) {
       console.error(`Failed to fetch widget ${widgetId} from mural ${muralId}:`, error);
@@ -469,9 +469,8 @@ export class MuralClient {
         throw new Error(`Permission denied: ${scopeCheck.message}. Please ensure your Mural OAuth app has 'murals:write' scope and re-authenticate.`);
       }
 
-      await this.makeAuthenticatedRequest<void>(`/deletewidgetbyid`, {
-        method: 'DELETE',
-        body: JSON.stringify({ muralId, widgetId })
+      await this.makeAuthenticatedRequest<void>(`/murals/${encodeURIComponent(muralId)}/widgets/${encodeURIComponent(widgetId)}`, {
+        method: 'DELETE'
       });
     } catch (error) {
       console.error(`Failed to delete widget ${widgetId} from mural ${muralId}:`, error);
@@ -487,7 +486,7 @@ export class MuralClient {
         throw new Error(`Permission denied: ${scopeCheck.message}. Please ensure your Mural OAuth app has 'murals:read' scope and re-authenticate.`);
       }
 
-      const response = await this.makeAuthenticatedRequest<MuralChatResponse>(`/getmuralchat?muralId=${encodeURIComponent(muralId)}`);
+      const response = await this.makeAuthenticatedRequest<MuralChatResponse>(`/murals/${encodeURIComponent(muralId)}/chat`);
       return response.value || [];
     } catch (error) {
       console.error(`Failed to fetch chat for mural ${muralId}:`, error);
@@ -502,7 +501,7 @@ export class MuralClient {
         throw new Error(`Permission denied: ${scopeCheck.message}. Please ensure your Mural OAuth app has 'murals:read' scope and re-authenticate.`);
       }
 
-      const response = await this.makeAuthenticatedRequest<MuralTagsResponse>(`/getmuraltags?muralId=${encodeURIComponent(muralId)}`);
+      const response = await this.makeAuthenticatedRequest<MuralTagsResponse>(`/murals/${encodeURIComponent(muralId)}/tags`);
       return response.value || [];
     } catch (error) {
       console.error(`Failed to fetch tags for mural ${muralId}:`, error);
@@ -517,9 +516,9 @@ export class MuralClient {
         throw new Error(`Permission denied: ${scopeCheck.message}. Please ensure your Mural OAuth app has 'murals:write' scope and re-authenticate.`);
       }
 
-      const response = await this.makeAuthenticatedRequest<any>(`/createmuraltag`, {
+      const response = await this.makeAuthenticatedRequest<any>(`/murals/${encodeURIComponent(muralId)}/tags`, {
         method: 'POST',
-        body: JSON.stringify({ muralId, ...tagData })
+        body: JSON.stringify(tagData)
       });
       return response.value || response;
     } catch (error) {
@@ -540,20 +539,10 @@ export class MuralClient {
         throw new Error('Maximum 1000 sticky notes per request');
       }
 
-      // Try RESTful endpoint first, fallback to legacy
-      let response;
-      try {
-        response = await this.makeAuthenticatedRequest<any>(`/murals/${muralId}/widgets/sticky-note`, {
-          method: 'POST',
-          body: JSON.stringify({ widgets: stickyNotes })
-        });
-      } catch (error) {
-        // Fallback to legacy endpoint
-        response = await this.makeAuthenticatedRequest<any>(`/createstickynote`, {
-          method: 'POST',
-          body: JSON.stringify({ muralId, stickyNotes })
-        });
-      }
+      const response = await this.makeAuthenticatedRequest<any>(`/murals/${encodeURIComponent(muralId)}/widgets/sticky-note`, {
+        method: 'POST',
+        body: JSON.stringify({ widgets: stickyNotes })
+      });
 
       return response.value || response || [];
     } catch (error) {
@@ -569,9 +558,9 @@ export class MuralClient {
         throw new Error(`Permission denied: ${scopeCheck.message}. Please ensure your Mural OAuth app has 'murals:write' scope and re-authenticate.`);
       }
 
-      const response = await this.makeAuthenticatedRequest<any>(`/createtextbox`, {
+      const response = await this.makeAuthenticatedRequest<any>(`/murals/${encodeURIComponent(muralId)}/widgets/text-box`, {
         method: 'POST',
-        body: JSON.stringify({ muralId, textBoxes })
+        body: JSON.stringify({ widgets: textBoxes })
       });
       return response.value || response || [];
     } catch (error) {
@@ -587,9 +576,9 @@ export class MuralClient {
         throw new Error(`Permission denied: ${scopeCheck.message}. Please ensure your Mural OAuth app has 'murals:write' scope and re-authenticate.`);
       }
 
-      const response = await this.makeAuthenticatedRequest<any>(`/createtitle`, {
+      const response = await this.makeAuthenticatedRequest<any>(`/murals/${encodeURIComponent(muralId)}/widgets/title`, {
         method: 'POST',
-        body: JSON.stringify({ muralId, titles })
+        body: JSON.stringify({ widgets: titles })
       });
       return response.value || response || [];
     } catch (error) {
@@ -605,9 +594,9 @@ export class MuralClient {
         throw new Error(`Permission denied: ${scopeCheck.message}. Please ensure your Mural OAuth app has 'murals:write' scope and re-authenticate.`);
       }
 
-      const response = await this.makeAuthenticatedRequest<any>(`/createshapewidget`, {
+      const response = await this.makeAuthenticatedRequest<any>(`/murals/${encodeURIComponent(muralId)}/widgets/shape`, {
         method: 'POST',
-        body: JSON.stringify({ muralId, shapes })
+        body: JSON.stringify({ widgets: shapes })
       });
       return response.value || response || [];
     } catch (error) {
@@ -623,9 +612,9 @@ export class MuralClient {
         throw new Error(`Permission denied: ${scopeCheck.message}. Please ensure your Mural OAuth app has 'murals:write' scope and re-authenticate.`);
       }
 
-      const response = await this.makeAuthenticatedRequest<any>(`/createimage`, {
+      const response = await this.makeAuthenticatedRequest<any>(`/murals/${encodeURIComponent(muralId)}/widgets/image`, {
         method: 'POST',
-        body: JSON.stringify({ muralId, images })
+        body: JSON.stringify({ widgets: images })
       });
       return response.value || response || [];
     } catch (error) {
@@ -641,9 +630,9 @@ export class MuralClient {
         throw new Error(`Permission denied: ${scopeCheck.message}. Please ensure your Mural OAuth app has 'murals:write' scope and re-authenticate.`);
       }
 
-      const response = await this.makeAuthenticatedRequest<any>(`/createfile`, {
+      const response = await this.makeAuthenticatedRequest<any>(`/murals/${encodeURIComponent(muralId)}/widgets/file`, {
         method: 'POST',
-        body: JSON.stringify({ muralId, files })
+        body: JSON.stringify({ widgets: files })
       });
       return response.value || response || [];
     } catch (error) {
@@ -659,9 +648,9 @@ export class MuralClient {
         throw new Error(`Permission denied: ${scopeCheck.message}. Please ensure your Mural OAuth app has 'murals:write' scope and re-authenticate.`);
       }
 
-      const response = await this.makeAuthenticatedRequest<any>(`/createtable`, {
+      const response = await this.makeAuthenticatedRequest<any>(`/murals/${encodeURIComponent(muralId)}/widgets/table`, {
         method: 'POST',
-        body: JSON.stringify({ muralId, tables })
+        body: JSON.stringify({ widgets: tables })
       });
       return response.value || response || [];
     } catch (error) {
@@ -677,9 +666,9 @@ export class MuralClient {
         throw new Error(`Permission denied: ${scopeCheck.message}. Please ensure your Mural OAuth app has 'murals:write' scope and re-authenticate.`);
       }
 
-      const response = await this.makeAuthenticatedRequest<any>(`/createarea`, {
+      const response = await this.makeAuthenticatedRequest<any>(`/murals/${encodeURIComponent(muralId)}/widgets/area`, {
         method: 'POST',
-        body: JSON.stringify({ muralId, areas })
+        body: JSON.stringify({ widgets: areas })
       });
       return response.value || response || [];
     } catch (error) {
@@ -695,9 +684,9 @@ export class MuralClient {
         throw new Error(`Permission denied: ${scopeCheck.message}. Please ensure your Mural OAuth app has 'murals:write' scope and re-authenticate.`);
       }
 
-      const response = await this.makeAuthenticatedRequest<any>(`/createarrow`, {
+      const response = await this.makeAuthenticatedRequest<any>(`/murals/${encodeURIComponent(muralId)}/widgets/arrow`, {
         method: 'POST',
-        body: JSON.stringify({ muralId, arrows })
+        body: JSON.stringify({ widgets: arrows })
       });
       return response.value || response || [];
     } catch (error) {
@@ -713,9 +702,9 @@ export class MuralClient {
         throw new Error(`Permission denied: ${scopeCheck.message}. Please ensure your Mural OAuth app has 'murals:write' scope and re-authenticate.`);
       }
 
-      const response = await this.makeAuthenticatedRequest<any>(`/createcomment`, {
+      const response = await this.makeAuthenticatedRequest<any>(`/murals/${encodeURIComponent(muralId)}/comments`, {
         method: 'POST',
-        body: JSON.stringify({ muralId, comments })
+        body: JSON.stringify({ comments })
       });
       return response.value || response || [];
     } catch (error) {
@@ -732,9 +721,9 @@ export class MuralClient {
         throw new Error(`Permission denied: ${scopeCheck.message}. Please ensure your Mural OAuth app has 'murals:write' scope and re-authenticate.`);
       }
 
-      const response = await this.makeAuthenticatedRequest<any>(`/startvotingsession`, {
+      const response = await this.makeAuthenticatedRequest<any>(`/murals/${encodeURIComponent(muralId)}/voting-sessions`, {
         method: 'POST',
-        body: JSON.stringify({ muralId, ...sessionData })
+        body: JSON.stringify(sessionData)
       });
       return response.value || response;
     } catch (error) {
@@ -750,9 +739,8 @@ export class MuralClient {
         throw new Error(`Permission denied: ${scopeCheck.message}. Please ensure your Mural OAuth app has 'murals:write' scope and re-authenticate.`);
       }
 
-      await this.makeAuthenticatedRequest<void>(`/deletevotingsession`, {
-        method: 'DELETE',
-        body: JSON.stringify({ muralId, sessionId })
+      await this.makeAuthenticatedRequest<void>(`/murals/${encodeURIComponent(muralId)}/voting-sessions/${encodeURIComponent(sessionId)}`, {
+        method: 'DELETE'
       });
     } catch (error) {
       console.error(`Failed to delete voting session ${sessionId} for mural ${muralId}:`, error);
@@ -767,7 +755,7 @@ export class MuralClient {
         throw new Error(`Permission denied: ${scopeCheck.message}. Please ensure your Mural OAuth app has 'murals:read' scope and re-authenticate.`);
       }
 
-      const response = await this.makeAuthenticatedRequest<any>(`/getvotingsession?muralId=${encodeURIComponent(muralId)}&sessionId=${encodeURIComponent(sessionId)}`);
+      const response = await this.makeAuthenticatedRequest<any>(`/murals/${encodeURIComponent(muralId)}/voting-sessions/${encodeURIComponent(sessionId)}`);
       return response.value || response;
     } catch (error) {
       console.error(`Failed to get voting session ${sessionId} for mural ${muralId}:`, error);
@@ -782,9 +770,9 @@ export class MuralClient {
         throw new Error(`Permission denied: ${scopeCheck.message}. Please ensure your Mural OAuth app has 'murals:write' scope and re-authenticate.`);
       }
 
-      await this.makeAuthenticatedRequest<void>(`/voteforwidgets`, {
+      await this.makeAuthenticatedRequest<void>(`/murals/${encodeURIComponent(muralId)}/voting-sessions/${encodeURIComponent(sessionId)}/votes`, {
         method: 'POST',
-        body: JSON.stringify({ muralId, sessionId, ...voteData })
+        body: JSON.stringify(voteData)
       });
     } catch (error) {
       console.error(`Failed to vote for widgets in session ${sessionId} for mural ${muralId}:`, error);
@@ -800,9 +788,9 @@ export class MuralClient {
         throw new Error(`Permission denied: ${scopeCheck.message}. Please ensure your Mural OAuth app has 'murals:write' scope and re-authenticate.`);
       }
 
-      const response = await this.makeAuthenticatedRequest<any>(`/starttimer`, {
+      const response = await this.makeAuthenticatedRequest<any>(`/murals/${encodeURIComponent(muralId)}/timer`, {
         method: 'POST',
-        body: JSON.stringify({ muralId, ...timerData })
+        body: JSON.stringify(timerData)
       });
       return response.value || response;
     } catch (error) {
@@ -818,9 +806,8 @@ export class MuralClient {
         throw new Error(`Permission denied: ${scopeCheck.message}. Please ensure your Mural OAuth app has 'murals:write' scope and re-authenticate.`);
       }
 
-      const response = await this.makeAuthenticatedRequest<any>(`/stoptimer`, {
-        method: 'POST',
-        body: JSON.stringify({ muralId })
+      const response = await this.makeAuthenticatedRequest<any>(`/murals/${encodeURIComponent(muralId)}/timer`, {
+        method: 'DELETE'
       });
       return response.value || response;
     } catch (error) {
@@ -836,9 +823,9 @@ export class MuralClient {
         throw new Error(`Permission denied: ${scopeCheck.message}. Please ensure your Mural OAuth app has 'murals:write' scope and re-authenticate.`);
       }
 
-      const response = await this.makeAuthenticatedRequest<any>(`/pausetimer`, {
-        method: 'POST',
-        body: JSON.stringify({ muralId })
+      const response = await this.makeAuthenticatedRequest<any>(`/murals/${encodeURIComponent(muralId)}/timer`, {
+        method: 'PATCH',
+        body: JSON.stringify({ action: 'pause' })
       });
       return response.value || response;
     } catch (error) {
@@ -854,7 +841,7 @@ export class MuralClient {
         throw new Error(`Permission denied: ${scopeCheck.message}. Please ensure your Mural OAuth app has 'murals:read' scope and re-authenticate.`);
       }
 
-      const response = await this.makeAuthenticatedRequest<any>(`/gettimer?muralId=${encodeURIComponent(muralId)}`);
+      const response = await this.makeAuthenticatedRequest<any>(`/murals/${encodeURIComponent(muralId)}/timer`);
       return response.value || response;
     } catch (error) {
       console.error(`Failed to get timer for mural ${muralId}:`, error);
@@ -870,9 +857,9 @@ export class MuralClient {
         throw new Error(`Permission denied: ${scopeCheck.message}. Please ensure your Mural OAuth app has 'murals:write' scope and re-authenticate.`);
       }
 
-      await this.makeAuthenticatedRequest<void>(`/updatemuralvisitorsettings`, {
+      await this.makeAuthenticatedRequest<void>(`/murals/${encodeURIComponent(muralId)}/visitor-settings`, {
         method: 'PATCH',
-        body: JSON.stringify({ muralId, ...settings })
+        body: JSON.stringify(settings)
       });
     } catch (error) {
       console.error(`Failed to update visitor settings for mural ${muralId}:`, error);
