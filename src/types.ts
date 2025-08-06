@@ -114,3 +114,19 @@ export interface MuralBoard {
   thumbnail?: string;
   url?: string;
 }
+
+export interface MuralUser {
+  id: string;
+  firstName?: string;
+  lastName?: string;
+  email?: string;
+  type?: string;
+  scopes?: string[];
+}
+
+export interface ScopeCheckResult {
+  hasScope: boolean;
+  requiredScope: string;
+  availableScopes: string[];
+  message: string;
+}

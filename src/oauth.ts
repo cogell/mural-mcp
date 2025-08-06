@@ -26,7 +26,15 @@ export class MuralOAuth {
     clientId: string,
     clientSecret?: string,
     redirectUri = 'http://localhost:3000/callback',
-    scopes = ['workspaces:read']
+    scopes = [
+      'workspaces:read',
+      'workspaces:write',
+      'rooms:read', 
+      'rooms:write',
+      'murals:read',
+      'murals:write',
+      'identity:read'
+    ]
   ) {
     this.clientId = clientId;
     this.clientSecret = clientSecret;
@@ -260,6 +268,10 @@ export class MuralOAuth {
   async getValidAccessToken(): Promise<string> {
     const tokens = await this.authenticate();
     return tokens.access_token;
+  }
+
+  async getStoredTokens(): Promise<OAuthTokens | null> {
+    return await this.loadTokens();
   }
 
   async clearTokens(): Promise<void> {

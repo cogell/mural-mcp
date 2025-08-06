@@ -1,4 +1,4 @@
-import type { MuralWorkspace, MuralWorkspacesResponse, MuralBoard, RateLimitConfig } from './types.js';
+import type { MuralWorkspace, MuralWorkspacesResponse, MuralBoard, MuralUser, ScopeCheckResult, RateLimitConfig } from './types.js';
 import { MuralOAuth } from './oauth.js';
 import { MuralRateLimiter } from './rate-limiter.js';
 
@@ -181,11 +181,26 @@ export class MuralClient {
 
   async getWorkspaceMurals(workspaceId: string): Promise<MuralBoard[]> {
     try {
-      const response = await this.makeAuthenticatedRequest<any>(`/getworkspacemurals?workspaceId=${workspaceId}`);
+      // Check if user has required scope first
+      const scopeCheck = await this.checkScope('murals:read');
+      if (!scopeCheck.hasScope) {
+        throw new Error(`Permission denied: ${scopeCheck.message}. Please ensure your Mural OAuth app has 'murals:read' scope and re-authenticate.`);
+      }
+
+      // Try RESTful endpoint (legacy endpoints appear to be deprecated/non-existent)
+      const response = await this.makeAuthenticatedRequest<any>(`/workspaces/${workspaceId}/murals`);
+      
       // The API response structure may vary, handle both direct array and wrapped response
       const murals = response.value || response.murals || response;
       return Array.isArray(murals) ? murals : [];
     } catch (error) {
+      // Check if error is scope-related and provide helpful message
+      if (error instanceof Error) {
+        if (error.message.includes('403') || error.message.includes('scope')) {
+          const scopeCheck = await this.checkScope('murals:read');
+          throw new Error(`Permission denied: ${scopeCheck.message}. Please ensure your Mural OAuth app has 'murals:read' scope and re-authenticate.`);
+        }
+      }
       console.error(`Failed to fetch murals for workspace ${workspaceId}:`, error);
       throw error;
     }
@@ -193,11 +208,26 @@ export class MuralClient {
 
   async getRoomMurals(roomId: string): Promise<MuralBoard[]> {
     try {
-      const response = await this.makeAuthenticatedRequest<any>(`/getroommurals?roomId=${roomId}`);
+      // Check if user has required scope first
+      const scopeCheck = await this.checkScope('murals:read');
+      if (!scopeCheck.hasScope) {
+        throw new Error(`Permission denied: ${scopeCheck.message}. Please ensure your Mural OAuth app has 'murals:read' scope and re-authenticate.`);
+      }
+
+      // Try RESTful endpoint (legacy endpoints appear to be deprecated/non-existent)
+      const response = await this.makeAuthenticatedRequest<any>(`/rooms/${roomId}/murals`);
+      
       // The API response structure may vary, handle both direct array and wrapped response
       const murals = response.value || response.murals || response;
       return Array.isArray(murals) ? murals : [];
     } catch (error) {
+      // Check if error is scope-related and provide helpful message
+      if (error instanceof Error) {
+        if (error.message.includes('403') || error.message.includes('scope')) {
+          const scopeCheck = await this.checkScope('murals:read');
+          throw new Error(`Permission denied: ${scopeCheck.message}. Please ensure your Mural OAuth app has 'murals:read' scope and re-authenticate.`);
+        }
+      }
       console.error(`Failed to fetch murals for room ${roomId}:`, error);
       throw error;
     }
@@ -205,11 +235,74 @@ export class MuralClient {
 
   async getMural(muralId: string): Promise<MuralBoard> {
     try {
+      // Check if user has required scope first
+      const scopeCheck = await this.checkScope('murals:read');
+      if (!scopeCheck.hasScope) {
+        throw new Error(`Permission denied: ${scopeCheck.message}. Please ensure your Mural OAuth app has 'murals:read' scope and re-authenticate.`);
+      }
+
       const mural = await this.makeAuthenticatedRequest<MuralBoard>(`/murals/${muralId}`);
       return mural;
     } catch (error) {
+      // Check if error is scope-related and provide helpful message
+      if (error instanceof Error) {
+        if (error.message.includes('403') || error.message.includes('scope')) {
+          const scopeCheck = await this.checkScope('murals:read');
+          throw new Error(`Permission denied: ${scopeCheck.message}. Please ensure your Mural OAuth app has 'murals:read' scope and re-authenticate.`);
+        }
+      }
       console.error(`Failed to fetch mural ${muralId}:`, error);
       throw error;
+    }
+  }
+
+  async getCurrentUser(): Promise<MuralUser> {
+    try {
+      const user = await this.makeAuthenticatedRequest<MuralUser>(`/users/me`);
+      return user;
+    } catch (error) {
+      console.error('Failed to fetch current user:', error);
+      throw error;
+    }
+  }
+
+  async getUserScopes(): Promise<string[]> {
+    try {
+      // Extract scopes from the stored OAuth token (primary method)
+      const tokens = await this.oauth.getStoredTokens();
+      if (tokens && tokens.scope) {
+        return tokens.scope.split(' ').filter(scope => scope.trim() !== '');
+      }
+      
+      // If no stored tokens or scope information, return empty array
+      // Don't try to fetch from API as that might require scopes we don't have
+      return [];
+    } catch (error) {
+      console.error('Failed to get user scopes:', error);
+      return [];
+    }
+  }
+
+  async checkScope(requiredScope: string): Promise<ScopeCheckResult> {
+    try {
+      const availableScopes = await this.getUserScopes();
+      const hasScope = availableScopes.includes(requiredScope);
+      
+      return {
+        hasScope,
+        requiredScope,
+        availableScopes,
+        message: hasScope 
+          ? `User has required scope: ${requiredScope}` 
+          : `User missing required scope: ${requiredScope}. Available scopes: ${availableScopes.join(', ') || 'none'}`
+      };
+    } catch (error) {
+      return {
+        hasScope: false,
+        requiredScope,
+        availableScopes: [],
+        message: `Failed to check scopes: ${error instanceof Error ? error.message : 'Unknown error'}`
+      };
     }
   }
 

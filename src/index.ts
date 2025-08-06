@@ -165,6 +165,15 @@ async function main() {
             required: ['boardId'],
             additionalProperties: false
           },
+        },
+        {
+          name: 'check-user-scopes',
+          description: 'Check the current user\'s OAuth scopes and permissions',
+          inputSchema: {
+            type: 'object',
+            properties: {},
+            additionalProperties: false
+          },
         }
       ],
     };
@@ -351,6 +360,46 @@ async function main() {
               {
                 type: 'text',
                 text: JSON.stringify(board, null, 2)
+              }
+            ],
+          };
+        }
+
+        case 'check-user-scopes': {
+          const scopes = await muralClient.getUserScopes();
+          
+          // Only try to get user info if we have identity:read scope
+          let user = null;
+          if (scopes.includes('identity:read')) {
+            user = await muralClient.getCurrentUser().catch(() => null);
+          }
+          
+          return {
+            content: [
+              {
+                type: 'text',
+                text: JSON.stringify({
+                  user: user ? { id: user.id, firstName: user.firstName, lastName: user.lastName, email: user.email } : 'User info unavailable (requires identity:read scope)',
+                  scopes,
+                  scopeCount: scopes.length,
+                  message: scopes.length === 0 
+                    ? 'No OAuth scopes available. Please re-authenticate or check your Mural app configuration.' 
+                    : `User has ${scopes.length} OAuth scope${scopes.length === 1 ? '' : 's'}`,
+                  recommendations: {
+                    'workspaces:read': scopes.includes('workspaces:read') ? 'Required for listing workspaces (✓ available)' : 'Required for listing workspaces (✗ missing)',
+                    'workspaces:write': scopes.includes('workspaces:write') ? 'Required for creating/modifying workspaces (✓ available)' : 'Required for creating/modifying workspaces (✗ missing)',
+                    'rooms:read': scopes.includes('rooms:read') ? 'Required for listing rooms (✓ available)' : 'Required for listing rooms (✗ missing)',
+                    'rooms:write': scopes.includes('rooms:write') ? 'Required for creating/modifying rooms (✓ available)' : 'Required for creating/modifying rooms (✗ missing)',
+                    'murals:read': scopes.includes('murals:read') ? 'Required for reading boards/murals (✓ available)' : 'Required for reading boards/murals (✗ missing)',
+                    'murals:write': scopes.includes('murals:write') ? 'Required for creating/modifying boards/murals (✓ available)' : 'Required for creating/modifying boards/murals (✗ missing)',
+                    'identity:read': scopes.includes('identity:read') ? 'Required for user info (✓ available)' : 'Required for user info (✗ missing)'
+                  },
+                  nextSteps: scopes.length === 0 
+                    ? ['Run clear-auth tool', 'Update your Mural app to include all required scopes', 'Re-authenticate when prompted']
+                    : (scopes.includes('murals:read') && scopes.includes('murals:write') && scopes.includes('workspaces:read') && scopes.includes('rooms:read'))
+                      ? ['You have comprehensive scopes for full workspace/room/board operations'] 
+                      : ['Add missing scopes to your Mural app: workspaces:read, workspaces:write, rooms:read, rooms:write, murals:read, murals:write, identity:read', 'Run clear-auth tool', 'Re-authenticate to get new scopes']
+                }, null, 2)
               }
             ],
           };
