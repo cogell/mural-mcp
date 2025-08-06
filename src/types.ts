@@ -9,13 +9,6 @@ export interface MuralWorkspace {
   deleted?: boolean;
 }
 
-export interface MuralWorkspacesResponse {
-  data: MuralWorkspace[];
-  total?: number;
-  limit?: number;
-  offset?: number;
-}
-
 export interface OAuthTokens {
   access_token: string;
   refresh_token?: string;
@@ -248,133 +241,20 @@ export interface ArrowWidget extends MuralWidget {
 }
 
 // Union type for all widgets
-export type AnyMuralWidget = 
-  | StickyNoteWidget 
-  | TextBoxWidget 
-  | TitleWidget 
-  | ShapeWidget 
-  | ImageWidget 
-  | FileWidget 
-  | TableWidget 
-  | AreaWidget 
+export type AnyMuralWidget =
+  | StickyNoteWidget
+  | TextBoxWidget
+  | TitleWidget
+  | ShapeWidget
+  | ImageWidget
+  | FileWidget
+  | TableWidget
+  | AreaWidget
   | ArrowWidget;
 
 // Widget creation requests and responses
 export interface CreateWidgetRequest {
   widgets: Partial<AnyMuralWidget>[];
-}
-
-export interface CreateWidgetResponse {
-  value: AnyMuralWidget[];
-}
-
-// Chat messages
-export interface MuralChatMessage {
-  id: string;
-  text: string;
-  createdBy: {
-    id: string;
-    firstName?: string;
-    lastName?: string;
-  };
-  createdOn: string;
-  muralId: string;
-}
-
-export interface MuralChatResponse {
-  value: MuralChatMessage[];
-}
-
-// Tags
-export interface MuralTag {
-  id: string;
-  name: string;
-  color?: string;
-  muralId: string;
-  createdOn?: string;
-}
-
-export interface MuralTagsResponse {
-  value: MuralTag[];
-}
-
-export interface CreateTagRequest {
-  name: string;
-  color?: string;
-}
-
-// Comments
-export interface MuralComment {
-  id: string;
-  text: string;
-  x: number;
-  y: number;
-  targetWidgetId?: string;
-  createdBy: {
-    id: string;
-    firstName?: string;
-    lastName?: string;
-  };
-  createdOn: string;
-  muralId: string;
-}
-
-export interface CreateCommentRequest {
-  text: string;
-  x: number;
-  y: number;
-  targetWidgetId?: string;
-}
-
-export interface CreateCommentResponse {
-  value: MuralComment[];
-}
-
-// Voting sessions
-export interface VotingSession {
-  id: string;
-  name: string;
-  status: 'active' | 'completed';
-  widgetIds: string[];
-  votes: {
-    widgetId: string;
-    count: number;
-  }[];
-  createdOn: string;
-  muralId: string;
-}
-
-export interface CreateVotingSessionRequest {
-  name: string;
-  widgetIds: string[];
-}
-
-export interface VoteRequest {
-  widgetIds: string[];
-}
-
-// Timer
-export interface TimerStatus {
-  id: string;
-  status: 'running' | 'paused' | 'stopped';
-  duration: number;
-  elapsed: number;
-  createdOn: string;
-  muralId: string;
-}
-
-export interface StartTimerRequest {
-  duration: number;
-}
-
-// Visitor settings
-export interface MuralVisitorSettings {
-  allowVisitors?: boolean;
-  visitorSettings?: {
-    canEdit?: boolean;
-    canComment?: boolean;
-    canVote?: boolean;
-  };
 }
 
 // Widget creation helpers
@@ -388,82 +268,6 @@ export interface CreateStickyNoteRequest {
   style?: WidgetTextStyle;
 }
 
-export interface CreateTextBoxRequest {
-  x: number;
-  y: number;
-  text: string;
-  width?: number;
-  height?: number;
-  style?: WidgetTextStyle;
-}
-
-export interface CreateTitleRequest {
-  x: number;
-  y: number;
-  text: string;
-  style?: {
-    fontSize?: number;
-    fontFamily?: string;
-    textColor?: string;
-  };
-}
-
-export interface CreateShapeRequest {
-  x: number;
-  y: number;
-  width: number;
-  height: number;
-  shape: 'rectangle' | 'circle' | 'triangle' | 'diamond';
-  style?: WidgetBorderStyle;
-}
-
-export interface CreateImageRequest {
-  x: number;
-  y: number;
-  url: string;
-  width?: number;
-  height?: number;
-  title?: string;
-}
-
-export interface CreateFileRequest {
-  x: number;
-  y: number;
-  filename: string;
-  url: string;
-}
-
-export interface CreateTableRequest {
-  x: number;
-  y: number;
-  rows: number;
-  columns: number;
-  data?: string[][];
-  style?: {
-    headerBackgroundColor?: string;
-    borderColor?: string;
-  };
-}
-
-export interface CreateAreaRequest {
-  x: number;
-  y: number;
-  width: number;
-  height: number;
-  title?: string;
-  style?: WidgetBorderStyle;
-}
-
-export interface CreateArrowRequest {
-  startWidget?: string;
-  endWidget?: string;
-  startX?: number;
-  startY?: number;
-  endX?: number;
-  endY?: number;
-  style?: WidgetArrowStyle;
-}
-
 // ============================================================================
 // UPDATE REQUEST TYPES FOR PATCH OPERATIONS
 // ============================================================================
@@ -473,78 +277,3 @@ export interface UpdateStickyNoteRequest extends Partial<CreateStickyNoteRequest
   id?: string; // Widget ID for updates
 }
 
-export interface UpdateTextBoxRequest extends Partial<CreateTextBoxRequest> {
-  id?: string;
-}
-
-export interface UpdateTitleRequest extends Partial<CreateTitleRequest> {
-  id?: string;
-}
-
-export interface UpdateShapeRequest extends Partial<CreateShapeRequest> {
-  id?: string;
-}
-
-export interface UpdateImageRequest extends Partial<CreateImageRequest> {
-  id?: string;
-}
-
-export interface UpdateFileRequest extends Partial<CreateFileRequest> {
-  id?: string;
-}
-
-export interface UpdateTableRequest extends Partial<CreateTableRequest> {
-  id?: string;
-}
-
-export interface UpdateAreaRequest extends Partial<CreateAreaRequest> {
-  id?: string;
-}
-
-export interface UpdateArrowRequest extends Partial<CreateArrowRequest> {
-  id?: string;
-}
-
-export interface UpdateCommentRequest {
-  id?: string;
-  text?: string;
-  x?: number;
-  y?: number;
-}
-
-// Tag update request
-export interface UpdateTagRequest {
-  name?: string;
-  color?: string;
-}
-
-// Permission update requests
-export interface UpdateRoomMemberPermissions {
-  members: Array<{
-    userId: string;
-    permissions: Array<'read' | 'write' | 'admin'>;
-  }>;
-}
-
-export interface UpdateMuralMemberPermissions {
-  members: Array<{
-    userId: string;
-    permissions: Array<'read' | 'write' | 'comment'>;
-  }>;
-}
-
-// Timer update request
-export interface UpdateTimerRequest {
-  action: 'pause' | 'resume';
-}
-
-// Room and mural update requests
-export interface UpdateRoomRequest {
-  name?: string;
-  description?: string;
-}
-
-export interface UpdateMuralRequest {
-  title?: string;
-  description?: string;
-}
