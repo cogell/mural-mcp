@@ -616,11 +616,50 @@ async function main() {
 
           const { muralId, stickyNotes } = schema.parse(args);
 
-          // Add required shape field to each sticky note
-          const stickyNotesWithShape = stickyNotes.map(note => ({
-            ...note,
-            shape: 'rectangle' as const
-          }));
+          // Helper function to calculate text-based dimensions
+          function calculateTextDimensions(text: string, fontSize = 14) {
+            const charWidth = fontSize * 0.6; // Approximate character width
+            const lineHeight = fontSize * 1.4; // Standard line height
+            const padding = 20; // Padding for sticky note
+            const minWidth = 120; // Minimum sticky note width
+            const maxWidth = 400; // Maximum sticky note width
+            
+            // Estimate text width and wrap to calculate height
+            const words = text.split(' ');
+            let currentLineWidth = 0;
+            let lines = 1;
+            
+            for (const word of words) {
+              const wordWidth = (word.length + 1) * charWidth; // +1 for space
+              
+              if (currentLineWidth + wordWidth > maxWidth - padding) {
+                // Word doesn't fit, start new line
+                lines++;
+                currentLineWidth = word.length * charWidth;
+              } else {
+                currentLineWidth += wordWidth;
+              }
+            }
+            
+            const calculatedWidth = Math.min(Math.max(currentLineWidth + padding, minWidth), maxWidth);
+            const calculatedHeight = Math.max(lines * lineHeight + padding, 60); // Minimum height of 60
+            
+            return { width: calculatedWidth, height: calculatedHeight };
+          }
+
+          // Add required shape field and calculate dimensions for each sticky note
+          const stickyNotesWithShape = stickyNotes.map(note => {
+            const fontSize = note.style?.fontSize || 14;
+            const dimensions = calculateTextDimensions(note.text, fontSize);
+            
+            return {
+              ...note,
+              shape: 'rectangle' as const,
+              // Use provided dimensions if available, otherwise use calculated ones
+              width: note.width || dimensions.width,
+              height: note.height || dimensions.height
+            };
+          });
 
           const createdWidgets = await muralClient.createStickyNotes(muralId, stickyNotesWithShape);
 
