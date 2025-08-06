@@ -174,6 +174,286 @@ async function main() {
             properties: {},
             additionalProperties: false
           },
+        },
+        // Content reading tools
+        {
+          name: 'get-mural-widgets',
+          description: 'Get all widgets from a mural',
+          inputSchema: {
+            type: 'object',
+            properties: {
+              muralId: {
+                type: 'string',
+                description: 'The unique identifier of the mural'
+              }
+            },
+            required: ['muralId'],
+            additionalProperties: false
+          },
+        },
+        {
+          name: 'get-mural-widget',
+          description: 'Get details of a specific widget by ID',
+          inputSchema: {
+            type: 'object',
+            properties: {
+              muralId: {
+                type: 'string',
+                description: 'The unique identifier of the mural'
+              },
+              widgetId: {
+                type: 'string',
+                description: 'The unique identifier of the widget'
+              }
+            },
+            required: ['muralId', 'widgetId'],
+            additionalProperties: false
+          },
+        },
+        {
+          name: 'get-mural-chat',
+          description: 'Get chat messages from a mural',
+          inputSchema: {
+            type: 'object',
+            properties: {
+              muralId: {
+                type: 'string',
+                description: 'The unique identifier of the mural'
+              }
+            },
+            required: ['muralId'],
+            additionalProperties: false
+          },
+        },
+        {
+          name: 'get-mural-tags',
+          description: 'Get tags from a mural',
+          inputSchema: {
+            type: 'object',
+            properties: {
+              muralId: {
+                type: 'string',
+                description: 'The unique identifier of the mural'
+              }
+            },
+            required: ['muralId'],
+            additionalProperties: false
+          },
+        },
+        {
+          name: 'delete-widget',
+          description: 'Delete a widget by ID',
+          inputSchema: {
+            type: 'object',
+            properties: {
+              muralId: {
+                type: 'string',
+                description: 'The unique identifier of the mural'
+              },
+              widgetId: {
+                type: 'string',
+                description: 'The unique identifier of the widget to delete'
+              }
+            },
+            required: ['muralId', 'widgetId'],
+            additionalProperties: false
+          },
+        },
+        // Widget creation tools
+        {
+          name: 'create-sticky-notes',
+          description: 'Create sticky notes on a mural (max 1000 per request)',
+          inputSchema: {
+            type: 'object',
+            properties: {
+              muralId: {
+                type: 'string',
+                description: 'The unique identifier of the mural'
+              },
+              stickyNotes: {
+                type: 'array',
+                description: 'Array of sticky notes to create',
+                items: {
+                  type: 'object',
+                  properties: {
+                    x: { type: 'number', description: 'X coordinate position' },
+                    y: { type: 'number', description: 'Y coordinate position' },
+                    text: { type: 'string', description: 'Text content of the sticky note' },
+                    width: { type: 'number', description: 'Width in pixels (optional)' },
+                    height: { type: 'number', description: 'Height in pixels (optional)' },
+                    style: {
+                      type: 'object',
+                      description: 'Visual styling properties (optional)',
+                      properties: {
+                        backgroundColor: { type: 'string', description: 'Background color' },
+                        textColor: { type: 'string', description: 'Text color' },
+                        fontSize: { type: 'number', description: 'Font size' }
+                      },
+                      additionalProperties: false
+                    }
+                  },
+                  required: ['x', 'y', 'text'],
+                  additionalProperties: false
+                },
+                maxItems: 1000,
+                minItems: 1
+              }
+            },
+            required: ['muralId', 'stickyNotes'],
+            additionalProperties: false
+          },
+        },
+        {
+          name: 'create-text-boxes',
+          description: 'Create text boxes on a mural',
+          inputSchema: {
+            type: 'object',
+            properties: {
+              muralId: {
+                type: 'string',
+                description: 'The unique identifier of the mural'
+              },
+              textBoxes: {
+                type: 'array',
+                description: 'Array of text boxes to create',
+                items: {
+                  type: 'object',
+                  properties: {
+                    x: { type: 'number', description: 'X coordinate position' },
+                    y: { type: 'number', description: 'Y coordinate position' },
+                    text: { type: 'string', description: 'Text content of the text box' },
+                    width: { type: 'number', description: 'Width in pixels (optional)' },
+                    height: { type: 'number', description: 'Height in pixels (optional)' },
+                    style: {
+                      type: 'object',
+                      description: 'Visual styling properties (optional)',
+                      properties: {
+                        backgroundColor: { type: 'string', description: 'Background color' },
+                        textColor: { type: 'string', description: 'Text color' },
+                        fontSize: { type: 'number', description: 'Font size' },
+                        alignment: { type: 'string', enum: ['left', 'center', 'right'], description: 'Text alignment' }
+                      },
+                      additionalProperties: false
+                    }
+                  },
+                  required: ['x', 'y', 'text'],
+                  additionalProperties: false
+                },
+                minItems: 1
+              }
+            },
+            required: ['muralId', 'textBoxes'],
+            additionalProperties: false
+          },
+        },
+        {
+          name: 'create-titles',
+          description: 'Create title widgets on a mural',
+          inputSchema: {
+            type: 'object',
+            properties: {
+              muralId: {
+                type: 'string',
+                description: 'The unique identifier of the mural'
+              },
+              titles: {
+                type: 'array',
+                description: 'Array of titles to create',
+                items: {
+                  type: 'object',
+                  properties: {
+                    x: { type: 'number', description: 'X coordinate position' },
+                    y: { type: 'number', description: 'Y coordinate position' },
+                    text: { type: 'string', description: 'Title text' },
+                    style: {
+                      type: 'object',
+                      description: 'Visual styling properties (optional)',
+                      properties: {
+                        fontSize: { type: 'number', description: 'Font size' },
+                        fontFamily: { type: 'string', description: 'Font family' },
+                        textColor: { type: 'string', description: 'Text color' }
+                      },
+                      additionalProperties: false
+                    }
+                  },
+                  required: ['x', 'y', 'text'],
+                  additionalProperties: false
+                },
+                minItems: 1
+              }
+            },
+            required: ['muralId', 'titles'],
+            additionalProperties: false
+          },
+        },
+        {
+          name: 'create-shapes',
+          description: 'Create shape widgets on a mural',
+          inputSchema: {
+            type: 'object',
+            properties: {
+              muralId: {
+                type: 'string',
+                description: 'The unique identifier of the mural'
+              },
+              shapes: {
+                type: 'array',
+                description: 'Array of shapes to create',
+                items: {
+                  type: 'object',
+                  properties: {
+                    x: { type: 'number', description: 'X coordinate position' },
+                    y: { type: 'number', description: 'Y coordinate position' },
+                    width: { type: 'number', description: 'Width in pixels' },
+                    height: { type: 'number', description: 'Height in pixels' },
+                    shape: { 
+                      type: 'string', 
+                      enum: ['rectangle', 'circle', 'triangle', 'diamond'],
+                      description: 'Shape type' 
+                    },
+                    style: {
+                      type: 'object',
+                      description: 'Visual styling properties (optional)',
+                      properties: {
+                        backgroundColor: { type: 'string', description: 'Background color' },
+                        borderColor: { type: 'string', description: 'Border color' },
+                        borderWidth: { type: 'number', description: 'Border width' }
+                      },
+                      additionalProperties: false
+                    }
+                  },
+                  required: ['x', 'y', 'width', 'height', 'shape'],
+                  additionalProperties: false
+                },
+                minItems: 1
+              }
+            },
+            required: ['muralId', 'shapes'],
+            additionalProperties: false
+          },
+        },
+        {
+          name: 'create-mural-tag',
+          description: 'Create a tag for a mural',
+          inputSchema: {
+            type: 'object',
+            properties: {
+              muralId: {
+                type: 'string',
+                description: 'The unique identifier of the mural'
+              },
+              name: {
+                type: 'string',
+                description: 'Name of the tag'
+              },
+              color: {
+                type: 'string',
+                description: 'Color of the tag (optional)'
+              }
+            },
+            required: ['muralId', 'name'],
+            additionalProperties: false
+          },
         }
       ],
     };
@@ -400,6 +680,293 @@ async function main() {
                     : (scopes.includes('murals:read') && scopes.includes('murals:write') && scopes.includes('workspaces:read') && scopes.includes('rooms:read') && scopes.includes('rooms:write') && scopes.includes('templates:read'))
                       ? ['You have comprehensive scopes for full workspace/room/board/template operations'] 
                       : ['Add missing scopes to your Mural app: workspaces:read, rooms:read, rooms:write, murals:read, murals:write, templates:read, templates:write, identity:read', 'Run clear-auth tool', 'Re-authenticate to get new scopes']
+                }, null, 2)
+              }
+            ],
+          };
+        }
+
+        // Content reading tools
+        case 'get-mural-widgets': {
+          const schema = z.object({
+            muralId: z.string().min(1)
+          });
+          
+          const { muralId } = schema.parse(args);
+          const widgets = await muralClient.getMuralWidgets(muralId);
+          
+          return {
+            content: [
+              {
+                type: 'text',
+                text: JSON.stringify({
+                  widgets,
+                  count: widgets.length,
+                  muralId,
+                  message: widgets.length === 0 
+                    ? `No widgets found in mural ${muralId}` 
+                    : `Found ${widgets.length} widget${widgets.length === 1 ? '' : 's'} in mural`
+                }, null, 2)
+              }
+            ],
+          };
+        }
+
+        case 'get-mural-widget': {
+          const schema = z.object({
+            muralId: z.string().min(1),
+            widgetId: z.string().min(1)
+          });
+          
+          const { muralId, widgetId } = schema.parse(args);
+          const widget = await muralClient.getMuralWidget(muralId, widgetId);
+          
+          return {
+            content: [
+              {
+                type: 'text',
+                text: JSON.stringify({
+                  widget,
+                  muralId,
+                  widgetId,
+                  message: `Widget details retrieved successfully`
+                }, null, 2)
+              }
+            ],
+          };
+        }
+
+        case 'get-mural-chat': {
+          const schema = z.object({
+            muralId: z.string().min(1)
+          });
+          
+          const { muralId } = schema.parse(args);
+          const chat = await muralClient.getMuralChat(muralId);
+          
+          return {
+            content: [
+              {
+                type: 'text',
+                text: JSON.stringify({
+                  chat,
+                  count: chat.length,
+                  muralId,
+                  message: chat.length === 0 
+                    ? `No chat messages found in mural ${muralId}` 
+                    : `Found ${chat.length} chat message${chat.length === 1 ? '' : 's'} in mural`
+                }, null, 2)
+              }
+            ],
+          };
+        }
+
+        case 'get-mural-tags': {
+          const schema = z.object({
+            muralId: z.string().min(1)
+          });
+          
+          const { muralId } = schema.parse(args);
+          const tags = await muralClient.getMuralTags(muralId);
+          
+          return {
+            content: [
+              {
+                type: 'text',
+                text: JSON.stringify({
+                  tags,
+                  count: tags.length,
+                  muralId,
+                  message: tags.length === 0 
+                    ? `No tags found in mural ${muralId}` 
+                    : `Found ${tags.length} tag${tags.length === 1 ? '' : 's'} in mural`
+                }, null, 2)
+              }
+            ],
+          };
+        }
+
+        case 'delete-widget': {
+          const schema = z.object({
+            muralId: z.string().min(1),
+            widgetId: z.string().min(1)
+          });
+          
+          const { muralId, widgetId } = schema.parse(args);
+          await muralClient.deleteWidget(muralId, widgetId);
+          
+          return {
+            content: [
+              {
+                type: 'text',
+                text: JSON.stringify({
+                  muralId,
+                  widgetId,
+                  message: `Widget ${widgetId} deleted successfully from mural ${muralId}`
+                }, null, 2)
+              }
+            ],
+          };
+        }
+
+        // Widget creation tools
+        case 'create-sticky-notes': {
+          const schema = z.object({
+            muralId: z.string().min(1),
+            stickyNotes: z.array(z.object({
+              x: z.number(),
+              y: z.number(),
+              text: z.string().min(1),
+              width: z.number().optional(),
+              height: z.number().optional(),
+              style: z.object({
+                backgroundColor: z.string().optional(),
+                textColor: z.string().optional(),
+                fontSize: z.number().optional()
+              }).optional()
+            })).min(1).max(1000)
+          });
+          
+          const { muralId, stickyNotes } = schema.parse(args);
+          const createdWidgets = await muralClient.createStickyNotes(muralId, stickyNotes);
+          
+          return {
+            content: [
+              {
+                type: 'text',
+                text: JSON.stringify({
+                  widgets: createdWidgets,
+                  count: createdWidgets.length,
+                  muralId,
+                  message: `Successfully created ${createdWidgets.length} sticky note${createdWidgets.length === 1 ? '' : 's'} in mural ${muralId}`
+                }, null, 2)
+              }
+            ],
+          };
+        }
+
+        case 'create-text-boxes': {
+          const schema = z.object({
+            muralId: z.string().min(1),
+            textBoxes: z.array(z.object({
+              x: z.number(),
+              y: z.number(),
+              text: z.string().min(1),
+              width: z.number().optional(),
+              height: z.number().optional(),
+              style: z.object({
+                backgroundColor: z.string().optional(),
+                textColor: z.string().optional(),
+                fontSize: z.number().optional(),
+                alignment: z.enum(['left', 'center', 'right']).optional()
+              }).optional()
+            })).min(1)
+          });
+          
+          const { muralId, textBoxes } = schema.parse(args);
+          const createdWidgets = await muralClient.createTextBoxes(muralId, textBoxes);
+          
+          return {
+            content: [
+              {
+                type: 'text',
+                text: JSON.stringify({
+                  widgets: createdWidgets,
+                  count: createdWidgets.length,
+                  muralId,
+                  message: `Successfully created ${createdWidgets.length} text box${createdWidgets.length === 1 ? '' : 'es'} in mural ${muralId}`
+                }, null, 2)
+              }
+            ],
+          };
+        }
+
+        case 'create-titles': {
+          const schema = z.object({
+            muralId: z.string().min(1),
+            titles: z.array(z.object({
+              x: z.number(),
+              y: z.number(),
+              text: z.string().min(1),
+              style: z.object({
+                fontSize: z.number().optional(),
+                fontFamily: z.string().optional(),
+                textColor: z.string().optional()
+              }).optional()
+            })).min(1)
+          });
+          
+          const { muralId, titles } = schema.parse(args);
+          const createdWidgets = await muralClient.createTitles(muralId, titles);
+          
+          return {
+            content: [
+              {
+                type: 'text',
+                text: JSON.stringify({
+                  widgets: createdWidgets,
+                  count: createdWidgets.length,
+                  muralId,
+                  message: `Successfully created ${createdWidgets.length} title${createdWidgets.length === 1 ? '' : 's'} in mural ${muralId}`
+                }, null, 2)
+              }
+            ],
+          };
+        }
+
+        case 'create-shapes': {
+          const schema = z.object({
+            muralId: z.string().min(1),
+            shapes: z.array(z.object({
+              x: z.number(),
+              y: z.number(),
+              width: z.number(),
+              height: z.number(),
+              shape: z.enum(['rectangle', 'circle', 'triangle', 'diamond']),
+              style: z.object({
+                backgroundColor: z.string().optional(),
+                borderColor: z.string().optional(),
+                borderWidth: z.number().optional()
+              }).optional()
+            })).min(1)
+          });
+          
+          const { muralId, shapes } = schema.parse(args);
+          const createdWidgets = await muralClient.createShapes(muralId, shapes);
+          
+          return {
+            content: [
+              {
+                type: 'text',
+                text: JSON.stringify({
+                  widgets: createdWidgets,
+                  count: createdWidgets.length,
+                  muralId,
+                  message: `Successfully created ${createdWidgets.length} shape${createdWidgets.length === 1 ? '' : 's'} in mural ${muralId}`
+                }, null, 2)
+              }
+            ],
+          };
+        }
+
+        case 'create-mural-tag': {
+          const schema = z.object({
+            muralId: z.string().min(1),
+            name: z.string().min(1),
+            color: z.string().optional()
+          });
+          
+          const { muralId, name, color } = schema.parse(args);
+          const createdTag = await muralClient.createMuralTag(muralId, { name, color });
+          
+          return {
+            content: [
+              {
+                type: 'text',
+                text: JSON.stringify({
+                  tag: createdTag,
+                  muralId,
+                  message: `Successfully created tag "${name}" in mural ${muralId}`
                 }, null, 2)
               }
             ],

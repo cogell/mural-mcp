@@ -85,14 +85,97 @@ All endpoints require OAuth 2.0 authentication with appropriate scopes.
 | GET | `/members/me` | Get current user | - |
 
 ### Content & Widgets
-*Note: These endpoints are inferred from GitHub examples and may require further verification*
 
-| Method | Endpoint | Description | Notes |
-|--------|----------|-------------|-------|
-| POST | `/murals/{muralId}/widgets` | Create widgets in a mural | Inferred from examples |
-| GET | `/murals/{muralId}/widgets` | Get widgets from a mural | Inferred from examples |
-| PATCH | `/murals/{muralId}/widgets/{widgetId}` | Update widget properties | Inferred from examples |
-| DELETE | `/murals/{muralId}/widgets/{widgetId}` | Delete a widget | Inferred from examples |
+The Mural Contents API provides comprehensive CRUD operations for managing mural content, including widgets, chat, tags, voting, and timers.
+
+#### Asset Management
+
+| Method | Endpoint | Description | Required Scope |
+|--------|----------|-------------|----------------|
+| POST | `/createasset` | Create asset URL for file uploads | `murals:write` |
+
+#### Mural Content
+
+| Method | Endpoint | Description | Required Scope |
+|--------|----------|-------------|----------------|
+| GET | `/getmuralchat` | Get chat messages from a mural | `murals:read` |
+| GET | `/getmuraltags` | Get tags associated with a mural | `murals:read` |
+| POST | `/createmuraltag` | Create a tag for a mural | `murals:write` |
+
+#### Widget Operations
+
+| Method | Endpoint | Description | Required Scope |
+|--------|----------|-------------|----------------|
+| GET | `/getmuralwidgets` | Get all widgets from a mural | `murals:read` |
+| GET | `/getmuralwidget` | Get details of a specific widget by ID | `murals:read` |
+| DELETE | `/deletewidgetbyid` | Delete a widget by ID | `murals:write` |
+
+#### Widget Creation
+
+| Method | Endpoint | Description | Required Scope | Max Per Request |
+|--------|----------|-------------|----------------|-----------------|
+| POST | `/murals/{muralId}/widgets/sticky-note` | Create sticky notes | `murals:write` | 1000 |
+| POST | `/createstickynote` | Create sticky notes (legacy) | `murals:write` | 1000 |
+| POST | `/createtextbox` | Create text boxes | `murals:write` | - |
+| POST | `/createtitle` | Create title widgets | `murals:write` | - |
+| POST | `/createshapewidget` | Create shape widgets | `murals:write` | - |
+| POST | `/createimage` | Create image widgets | `murals:write` | - |
+| POST | `/createfile` | Create file widgets | `murals:write` | - |
+| POST | `/createtable` | Create table widgets | `murals:write` | - |
+| POST | `/createarea` | Create area widgets (for grouping) | `murals:write` | - |
+| POST | `/createarrow` | Create arrow connector widgets | `murals:write` | - |
+| POST | `/createcomment` | Create comments on widgets | `murals:write` | - |
+
+#### Interactive Features
+
+| Method | Endpoint | Description | Required Scope |
+|--------|----------|-------------|----------------|
+| POST | `/startvotingsession` | Start voting session on widgets | `murals:write` |
+| DELETE | `/deletevotingsession` | End voting session | `murals:write` |
+| GET | `/getvotingsession` | Get voting session details | `murals:read` |
+| POST | `/voteforwidgets` | Vote for specific widgets | `murals:write` |
+| POST | `/starttimer` | Start timer in mural | `murals:write` |
+| POST | `/stoptimer` | Stop timer in mural | `murals:write` |
+| POST | `/pausetimer` | Pause/resume timer | `murals:write` |
+| GET | `/gettimer` | Get timer status | `murals:read` |
+
+#### Visitor Management
+
+| Method | Endpoint | Description | Required Scope |
+|--------|----------|-------------|----------------|
+| PATCH | `/updatemuralvisitorsettings` | Update mural visitor settings | `murals:write` |
+
+### Supported Widget Types
+
+The Contents API supports the following widget types for creation and manipulation:
+
+| Widget Type | Description | Key Properties |
+|-------------|-------------|----------------|
+| **Sticky Note** | Text notes with colored backgrounds | `text`, `x`, `y`, `width`, `height`, `style` |
+| **Text Box** | Formatted text containers | `text`, `x`, `y`, `width`, `height`, `style` |
+| **Title** | Header/title text widgets | `text`, `x`, `y`, `style` |
+| **Shape** | Geometric shapes (rectangle, circle, etc.) | `x`, `y`, `width`, `height`, `shape`, `style` |
+| **Image** | Image widgets from URLs or uploads | `x`, `y`, `width`, `height`, `url`, `title` |
+| **File** | File attachment widgets | `x`, `y`, `filename`, `url` |
+| **Table** | Structured data tables | `x`, `y`, `rows`, `columns`, `data` |
+| **Area** | Grouping containers for other widgets | `x`, `y`, `width`, `height`, `title`, `style` |
+| **Arrow** | Connectors between widgets | `startWidget`, `endWidget`, `style` |
+| **Comment** | Comments attached to specific widgets | `targetWidget`, `text`, `x`, `y` |
+
+### Widget Properties
+
+Common properties across most widget types:
+
+- **Position**: `x`, `y` coordinates on the mural canvas
+- **Size**: `width`, `height` dimensions (where applicable)
+- **Style**: Visual styling properties (colors, fonts, etc.)
+- **Content**: Text content or references to external resources
+
+### Content Limits
+
+- **Sticky Notes**: Maximum 1000 per request
+- **Text Content**: Character limits vary by widget type
+- **File Uploads**: Size limits apply (refer to API documentation)
 
 ## API Scopes
 
@@ -130,3 +213,17 @@ The API appears to have two different endpoint naming conventions:
 2. Action-based paths (e.g., `/getmuralbyid`) - possibly legacy
 
 When implementing, prefer the RESTful endpoints where available.
+
+## Contents API Implementation Notes
+
+The Contents API represents a comprehensive set of endpoints for programmatic mural content manipulation:
+
+1. **Two API Styles**: The API uses both RESTful paths (e.g., `/murals/{muralId}/widgets/sticky-note`) and action-based paths (e.g., `/createstickynote`). RESTful endpoints are preferred for new implementations.
+
+2. **Batch Operations**: Many creation endpoints support batch operations (especially sticky notes with up to 1000 per request).
+
+3. **Coordinate System**: Widget positioning uses an x,y coordinate system on the mural canvas.
+
+4. **Interactive Features**: The API supports advanced collaboration features like voting sessions, timers, and real-time chat.
+
+5. **Content Management**: Full CRUD operations are supported for most widget types, enabling comprehensive mural content management.
