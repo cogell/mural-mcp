@@ -4,6 +4,9 @@ import { MuralRateLimiter } from './rate-limiter.js';
 
 const MURAL_API_BASE = 'https://app.mural.co/api/public/v1';
 
+// Global authentication promise to prevent multiple concurrent auth flows
+let globalAuthPromise: Promise<string> | null = null;
+
 export class MuralClient {
   private oauth: MuralOAuth;
   private baseUrl: string;
@@ -13,6 +16,24 @@ export class MuralClient {
     this.oauth = new MuralOAuth(clientId, clientSecret, redirectUri);
     this.baseUrl = MURAL_API_BASE;
     this.rateLimiter = new MuralRateLimiter(rateLimitConfig);
+  }
+
+  private async getAccessToken(): Promise<string> {
+    // If authentication is already in progress globally, wait for it
+    if (globalAuthPromise) {
+      return globalAuthPromise;
+    }
+
+    // Start new authentication and store globally
+    globalAuthPromise = this.oauth.getValidAccessToken();
+    
+    try {
+      const token = await globalAuthPromise;
+      return token;
+    } finally {
+      // Clear the global promise when done (success or failure)
+      globalAuthPromise = null;
+    }
   }
 
   private async makeAuthenticatedRequest<T>(
@@ -42,7 +63,7 @@ export class MuralClient {
       }
 
       try {
-        const accessToken = await this.oauth.getValidAccessToken();
+        const accessToken = await this.getAccessToken();
         
         const url = `${this.baseUrl}${endpoint}`;
         const headers = {
@@ -168,6 +189,8 @@ export class MuralClient {
   }
 
   async clearAuthentication(): Promise<void> {
+    // Clear the global auth promise
+    globalAuthPromise = null;
     await this.oauth.clearTokens();
   }
 

@@ -21,6 +21,7 @@ export class MuralOAuth {
   private clientSecret?: string;
   private redirectUri: string;
   private scopes: string[];
+  private authenticationPromise: Promise<OAuthTokens> | null = null;
 
   constructor(
     clientId: string,
@@ -164,16 +165,28 @@ export class MuralOAuth {
 
   private async startCallbackServer(expectedState?: string): Promise<{ code: string; state?: string }> {
     return new Promise((resolve, reject) => {
+      let resolved = false;
+      
       const server = http.createServer((req, res) => {
         if (req.url?.startsWith('/callback')) {
+          // Prevent multiple resolutions
+          if (resolved) {
+            res.writeHead(200, { 'Content-Type': 'text/html' });
+            res.end('<h1>Already processed</h1><p>Authentication already handled. You can close this window.</p>');
+            return;
+          }
+
           const url = new URL(req.url, `http://localhost:3000`);
           const code = url.searchParams.get('code');
           const state = url.searchParams.get('state');
           const error = url.searchParams.get('error');
 
+          console.log(`Callback received - Code: ${code ? 'present' : 'missing'}, State: ${state}, Expected: ${expectedState}`);
+
           if (error) {
             res.writeHead(400, { 'Content-Type': 'text/html' });
             res.end(`<h1>Authentication Error</h1><p>${error}</p>`);
+            resolved = true;
             server.close();
             reject(new Error(`OAuth error: ${error}`));
             return;
@@ -182,21 +195,25 @@ export class MuralOAuth {
           if (!code) {
             res.writeHead(400, { 'Content-Type': 'text/html' });
             res.end('<h1>Error</h1><p>No authorization code received</p>');
+            resolved = true;
             server.close();
             reject(new Error('No authorization code received'));
             return;
           }
 
           if (expectedState && state !== expectedState) {
+            console.error(`State mismatch - Expected: "${expectedState}", Received: "${state}"`);
             res.writeHead(400, { 'Content-Type': 'text/html' });
-            res.end('<h1>Error</h1><p>Invalid state parameter</p>');
+            res.end(`<h1>Error</h1><p>Invalid state parameter. Expected: ${expectedState}, Got: ${state}</p>`);
+            resolved = true;
             server.close();
-            reject(new Error('Invalid state parameter'));
+            reject(new Error(`Invalid state parameter. Expected: ${expectedState}, Got: ${state}`));
             return;
           }
 
           res.writeHead(200, { 'Content-Type': 'text/html' });
           res.end('<h1>Success!</h1><p>Authentication successful. You can close this window.</p>');
+          resolved = true;
           server.close();
           resolve({ code, state: state || undefined });
         } else {
@@ -210,12 +227,42 @@ export class MuralOAuth {
       });
 
       server.on('error', (error) => {
-        reject(error);
+        if (!resolved) {
+          resolved = true;
+          reject(error);
+        }
       });
+
+      // Add timeout to prevent hanging
+      setTimeout(() => {
+        if (!resolved) {
+          resolved = true;
+          server.close();
+          reject(new Error('Authentication timeout after 5 minutes'));
+        }
+      }, 5 * 60 * 1000);
     });
   }
 
   async authenticate(): Promise<OAuthTokens> {
+    // If authentication is already in progress, return the existing promise
+    if (this.authenticationPromise) {
+      return this.authenticationPromise;
+    }
+
+    // Start new authentication and store the promise
+    this.authenticationPromise = this.performAuthentication();
+    
+    try {
+      const tokens = await this.authenticationPromise;
+      return tokens;
+    } finally {
+      // Clear the promise when done (success or failure)
+      this.authenticationPromise = null;
+    }
+  }
+
+  private async performAuthentication(): Promise<OAuthTokens> {
     // Check for existing valid tokens
     const existingTokens = await this.loadTokens();
     if (existingTokens && existingTokens.expires_at && existingTokens.expires_at > Date.now()) {
