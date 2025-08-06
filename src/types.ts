@@ -463,3 +463,88 @@ export interface CreateArrowRequest {
   endY?: number;
   style?: WidgetArrowStyle;
 }
+
+// ============================================================================
+// UPDATE REQUEST TYPES FOR PATCH OPERATIONS
+// ============================================================================
+
+// Widget update request interfaces
+export interface UpdateStickyNoteRequest extends Partial<CreateStickyNoteRequest> {
+  id?: string; // Widget ID for updates
+}
+
+export interface UpdateTextBoxRequest extends Partial<CreateTextBoxRequest> {
+  id?: string;
+}
+
+export interface UpdateTitleRequest extends Partial<CreateTitleRequest> {
+  id?: string;
+}
+
+export interface UpdateShapeRequest extends Partial<CreateShapeRequest> {
+  id?: string;
+}
+
+export interface UpdateImageRequest extends Partial<CreateImageRequest> {
+  id?: string;
+}
+
+export interface UpdateFileRequest extends Partial<CreateFileRequest> {
+  id?: string;
+}
+
+export interface UpdateTableRequest extends Partial<CreateTableRequest> {
+  id?: string;
+}
+
+export interface UpdateAreaRequest extends Partial<CreateAreaRequest> {
+  id?: string;
+}
+
+export interface UpdateArrowRequest extends Partial<CreateArrowRequest> {
+  id?: string;
+}
+
+export interface UpdateCommentRequest {
+  id?: string;
+  text?: string;
+  x?: number;
+  y?: number;
+}
+
+// Tag update request
+export interface UpdateTagRequest {
+  name?: string;
+  color?: string;
+}
+
+// Permission update requests
+export interface UpdateRoomMemberPermissions {
+  members: Array<{
+    userId: string;
+    permissions: Array<'read' | 'write' | 'admin'>;
+  }>;
+}
+
+export interface UpdateMuralMemberPermissions {
+  members: Array<{
+    userId: string;
+    permissions: Array<'read' | 'write' | 'comment'>;
+  }>;
+}
+
+// Timer update request
+export interface UpdateTimerRequest {
+  action: 'pause' | 'resume';
+}
+
+// Room and mural update requests
+export interface UpdateRoomRequest {
+  name?: string;
+  description?: string;
+}
+
+export interface UpdateMuralRequest {
+  title?: string;
+  description?: string;
+}

@@ -110,6 +110,20 @@ The Mural Contents API provides comprehensive CRUD operations for managing mural
 | POST | `/murals/{muralId}/widgets/area` | Create area widgets (for grouping) | `murals:write` | - |
 | POST | `/murals/{muralId}/widgets/arrow` | Create arrow connector widgets | `murals:write` | - |
 
+#### Widget Updates
+
+| Method | Endpoint | Description | Required Scope |
+|--------|----------|-------------|----------------|
+| PATCH | `/murals/{muralId}/widgets/sticky-note/{widgetId}` | Update a sticky note widget | `murals:write` |
+| PATCH | `/murals/{muralId}/widgets/text-box/{widgetId}` | Update a text box widget | `murals:write` |
+| PATCH | `/murals/{muralId}/widgets/title/{widgetId}` | Update a title widget | `murals:write` |
+| PATCH | `/murals/{muralId}/widgets/shape/{widgetId}` | Update a shape widget | `murals:write` |
+| PATCH | `/murals/{muralId}/widgets/image/{widgetId}` | Update an image widget | `murals:write` |
+| PATCH | `/murals/{muralId}/widgets/file/{widgetId}` | Update a file widget | `murals:write` |
+| PATCH | `/murals/{muralId}/widgets/area/{widgetId}` | Update an area widget | `murals:write` |
+| PATCH | `/murals/{muralId}/widgets/arrow/{widgetId}` | Update an arrow widget | `murals:write` |
+| PATCH | `/murals/{muralId}/widgets/comment/{widgetId}` | Update a comment widget | `murals:write` |
+
 #### Mural Content
 
 | Method | Endpoint | Description | Required Scope |
@@ -117,6 +131,7 @@ The Mural Contents API provides comprehensive CRUD operations for managing mural
 | GET | `/murals/{muralId}/chat` | Get chat messages from a mural | `murals:read` |
 | GET | `/murals/{muralId}/tags` | Get tags associated with a mural | `murals:read` |
 | POST | `/murals/{muralId}/tags` | Create a tag for a mural | `murals:write` |
+| PATCH | `/murals/{muralId}/tags/{tagId}` | Update a tag on a mural | `murals:write` |
 | POST | `/murals/{muralId}/comments` | Create comments on widgets | `murals:write` |
 
 #### Interactive Features

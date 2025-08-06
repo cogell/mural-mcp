@@ -454,6 +454,318 @@ async function main() {
             required: ['muralId', 'name'],
             additionalProperties: false
           },
+        },
+        // PATCH/Update tools
+        {
+          name: 'update-sticky-note',
+          description: 'Update a sticky note widget in a mural',
+          inputSchema: {
+            type: 'object',
+            properties: {
+              muralId: {
+                type: 'string',
+                description: 'The unique identifier of the mural'
+              },
+              widgetId: {
+                type: 'string', 
+                description: 'The unique identifier of the sticky note widget to update'
+              },
+              updates: {
+                type: 'object',
+                description: 'The properties to update',
+                properties: {
+                  x: { type: 'number', description: 'X coordinate position' },
+                  y: { type: 'number', description: 'Y coordinate position' },
+                  text: { type: 'string', description: 'Text content of the sticky note' },
+                  width: { type: 'number', description: 'Width in pixels' },
+                  height: { type: 'number', description: 'Height in pixels' },
+                  style: {
+                    type: 'object',
+                    description: 'Visual styling properties',
+                    properties: {
+                      backgroundColor: { type: 'string', description: 'Background color' },
+                      textColor: { type: 'string', description: 'Text color' },
+                      fontSize: { type: 'number', description: 'Font size' }
+                    },
+                    additionalProperties: false
+                  }
+                },
+                additionalProperties: false
+              }
+            },
+            required: ['muralId', 'widgetId', 'updates'],
+            additionalProperties: false
+          },
+        },
+        {
+          name: 'update-text-box',
+          description: 'Update a text box widget in a mural',
+          inputSchema: {
+            type: 'object',
+            properties: {
+              muralId: { type: 'string', description: 'The unique identifier of the mural' },
+              widgetId: { type: 'string', description: 'The unique identifier of the text box widget to update' },
+              updates: {
+                type: 'object',
+                description: 'The properties to update',
+                properties: {
+                  x: { type: 'number', description: 'X coordinate position' },
+                  y: { type: 'number', description: 'Y coordinate position' },
+                  text: { type: 'string', description: 'Text content of the text box' },
+                  width: { type: 'number', description: 'Width in pixels' },
+                  height: { type: 'number', description: 'Height in pixels' },
+                  style: {
+                    type: 'object',
+                    description: 'Visual styling properties',
+                    properties: {
+                      backgroundColor: { type: 'string', description: 'Background color' },
+                      textColor: { type: 'string', description: 'Text color' },
+                      fontSize: { type: 'number', description: 'Font size' },
+                      alignment: { type: 'string', enum: ['left', 'center', 'right'], description: 'Text alignment' }
+                    },
+                    additionalProperties: false
+                  }
+                },
+                additionalProperties: false
+              }
+            },
+            required: ['muralId', 'widgetId', 'updates'],
+            additionalProperties: false
+          },
+        },
+        {
+          name: 'update-title',
+          description: 'Update a title widget in a mural',
+          inputSchema: {
+            type: 'object',
+            properties: {
+              muralId: { type: 'string', description: 'The unique identifier of the mural' },
+              widgetId: { type: 'string', description: 'The unique identifier of the title widget to update' },
+              updates: {
+                type: 'object',
+                description: 'The properties to update',
+                properties: {
+                  x: { type: 'number', description: 'X coordinate position' },
+                  y: { type: 'number', description: 'Y coordinate position' },
+                  text: { type: 'string', description: 'Title text' },
+                  style: {
+                    type: 'object',
+                    description: 'Visual styling properties',
+                    properties: {
+                      fontSize: { type: 'number', description: 'Font size' },
+                      fontFamily: { type: 'string', description: 'Font family' },
+                      textColor: { type: 'string', description: 'Text color' }
+                    },
+                    additionalProperties: false
+                  }
+                },
+                additionalProperties: false
+              }
+            },
+            required: ['muralId', 'widgetId', 'updates'],
+            additionalProperties: false
+          },
+        },
+        {
+          name: 'update-shape',
+          description: 'Update a shape widget in a mural',
+          inputSchema: {
+            type: 'object',
+            properties: {
+              muralId: { type: 'string', description: 'The unique identifier of the mural' },
+              widgetId: { type: 'string', description: 'The unique identifier of the shape widget to update' },
+              updates: {
+                type: 'object',
+                description: 'The properties to update',
+                properties: {
+                  x: { type: 'number', description: 'X coordinate position' },
+                  y: { type: 'number', description: 'Y coordinate position' },
+                  width: { type: 'number', description: 'Width in pixels' },
+                  height: { type: 'number', description: 'Height in pixels' },
+                  shape: { 
+                    type: 'string', 
+                    enum: ['rectangle', 'circle', 'triangle', 'diamond'],
+                    description: 'Shape type' 
+                  },
+                  style: {
+                    type: 'object',
+                    description: 'Visual styling properties',
+                    properties: {
+                      backgroundColor: { type: 'string', description: 'Background color' },
+                      borderColor: { type: 'string', description: 'Border color' },
+                      borderWidth: { type: 'number', description: 'Border width' }
+                    },
+                    additionalProperties: false
+                  }
+                },
+                additionalProperties: false
+              }
+            },
+            required: ['muralId', 'widgetId', 'updates'],
+            additionalProperties: false
+          },
+        },
+        {
+          name: 'update-mural-tag',
+          description: 'Update a tag in a mural',
+          inputSchema: {
+            type: 'object',
+            properties: {
+              muralId: {
+                type: 'string',
+                description: 'The unique identifier of the mural'
+              },
+              tagId: {
+                type: 'string',
+                description: 'The unique identifier of the tag to update'
+              },
+              updates: {
+                type: 'object',
+                description: 'The tag properties to update',
+                properties: {
+                  name: { type: 'string', description: 'Name of the tag' },
+                  color: { type: 'string', description: 'Color of the tag' }
+                },
+                additionalProperties: false
+              }
+            },
+            required: ['muralId', 'tagId', 'updates'],
+            additionalProperties: false
+          },
+        },
+        {
+          name: 'update-timer',
+          description: 'Update (pause/resume) mural timer',
+          inputSchema: {
+            type: 'object',
+            properties: {
+              muralId: {
+                type: 'string',
+                description: 'The unique identifier of the mural'
+              },
+              action: {
+                type: 'string',
+                enum: ['pause', 'resume'],
+                description: 'Action to perform on the timer'
+              }
+            },
+            required: ['muralId', 'action'],
+            additionalProperties: false
+          },
+        },
+        {
+          name: 'update-room-member-permissions',
+          description: 'Update room member permissions',
+          inputSchema: {
+            type: 'object',
+            properties: {
+              roomId: {
+                type: 'string',
+                description: 'The unique identifier of the room'
+              },
+              members: {
+                type: 'array',
+                description: 'Array of member permission updates',
+                items: {
+                  type: 'object',
+                  properties: {
+                    userId: { type: 'string', description: 'User ID' },
+                    permissions: {
+                      type: 'array',
+                      items: { type: 'string', enum: ['read', 'write', 'admin'] },
+                      description: 'Array of permissions to grant'
+                    }
+                  },
+                  required: ['userId', 'permissions'],
+                  additionalProperties: false
+                },
+                minItems: 1
+              }
+            },
+            required: ['roomId', 'members'],
+            additionalProperties: false
+          },
+        },
+        {
+          name: 'update-mural-member-permissions',
+          description: 'Update mural member permissions',
+          inputSchema: {
+            type: 'object',
+            properties: {
+              muralId: {
+                type: 'string',
+                description: 'The unique identifier of the mural'
+              },
+              members: {
+                type: 'array',
+                description: 'Array of member permission updates',
+                items: {
+                  type: 'object',
+                  properties: {
+                    userId: { type: 'string', description: 'User ID' },
+                    permissions: {
+                      type: 'array',
+                      items: { type: 'string', enum: ['read', 'write', 'comment'] },
+                      description: 'Array of permissions to grant'
+                    }
+                  },
+                  required: ['userId', 'permissions'],
+                  additionalProperties: false
+                },
+                minItems: 1
+              }
+            },
+            required: ['muralId', 'members'],
+            additionalProperties: false
+          },
+        },
+        {
+          name: 'update-room',
+          description: 'Update room details',
+          inputSchema: {
+            type: 'object',
+            properties: {
+              roomId: {
+                type: 'string',
+                description: 'The unique identifier of the room'
+              },
+              updates: {
+                type: 'object',
+                description: 'The room properties to update',
+                properties: {
+                  name: { type: 'string', description: 'Room name' },
+                  description: { type: 'string', description: 'Room description' }
+                },
+                additionalProperties: false
+              }
+            },
+            required: ['roomId', 'updates'],
+            additionalProperties: false
+          },
+        },
+        {
+          name: 'update-mural',
+          description: 'Update mural details',
+          inputSchema: {
+            type: 'object',
+            properties: {
+              muralId: {
+                type: 'string',
+                description: 'The unique identifier of the mural'
+              },
+              updates: {
+                type: 'object',
+                description: 'The mural properties to update',
+                properties: {
+                  title: { type: 'string', description: 'Mural title' },
+                  description: { type: 'string', description: 'Mural description' }
+                },
+                additionalProperties: false
+              }
+            },
+            required: ['muralId', 'updates'],
+            additionalProperties: false
+          },
         }
       ],
     };
@@ -974,6 +1286,311 @@ async function main() {
                   tag: createdTag,
                   muralId,
                   message: `Successfully created tag "${name}" in mural ${muralId}`
+                }, null, 2)
+              }
+            ],
+          };
+        }
+
+        // PATCH/Update tool handlers
+        case 'update-sticky-note': {
+          const schema = z.object({
+            muralId: z.string().min(1),
+            widgetId: z.string().min(1),
+            updates: z.object({
+              x: z.number().optional(),
+              y: z.number().optional(),
+              text: z.string().min(1).optional(),
+              width: z.number().optional(),
+              height: z.number().optional(),
+              style: z.object({
+                backgroundColor: z.string().optional(),
+                textColor: z.string().optional(),
+                fontSize: z.number().optional()
+              }).optional()
+            })
+          });
+          
+          const { muralId, widgetId, updates } = schema.parse(args);
+          const updatedWidget = await muralClient.updateStickyNote(muralId, widgetId, updates);
+          
+          return {
+            content: [
+              {
+                type: 'text',
+                text: JSON.stringify({
+                  widget: updatedWidget,
+                  muralId,
+                  widgetId,
+                  message: `Successfully updated sticky note ${widgetId} in mural ${muralId}`
+                }, null, 2)
+              }
+            ],
+          };
+        }
+
+        case 'update-text-box': {
+          const schema = z.object({
+            muralId: z.string().min(1),
+            widgetId: z.string().min(1),
+            updates: z.object({
+              x: z.number().optional(),
+              y: z.number().optional(),
+              text: z.string().min(1).optional(),
+              width: z.number().optional(),
+              height: z.number().optional(),
+              style: z.object({
+                backgroundColor: z.string().optional(),
+                textColor: z.string().optional(),
+                fontSize: z.number().optional(),
+                alignment: z.enum(['left', 'center', 'right']).optional()
+              }).optional()
+            })
+          });
+          
+          const { muralId, widgetId, updates } = schema.parse(args);
+          const updatedWidget = await muralClient.updateTextBox(muralId, widgetId, updates);
+          
+          return {
+            content: [
+              {
+                type: 'text',
+                text: JSON.stringify({
+                  widget: updatedWidget,
+                  muralId,
+                  widgetId,
+                  message: `Successfully updated text box ${widgetId} in mural ${muralId}`
+                }, null, 2)
+              }
+            ],
+          };
+        }
+
+        case 'update-title': {
+          const schema = z.object({
+            muralId: z.string().min(1),
+            widgetId: z.string().min(1),
+            updates: z.object({
+              x: z.number().optional(),
+              y: z.number().optional(),
+              text: z.string().min(1).optional(),
+              style: z.object({
+                fontSize: z.number().optional(),
+                fontFamily: z.string().optional(),
+                textColor: z.string().optional()
+              }).optional()
+            })
+          });
+          
+          const { muralId, widgetId, updates } = schema.parse(args);
+          const updatedWidget = await muralClient.updateTitle(muralId, widgetId, updates);
+          
+          return {
+            content: [
+              {
+                type: 'text',
+                text: JSON.stringify({
+                  widget: updatedWidget,
+                  muralId,
+                  widgetId,
+                  message: `Successfully updated title ${widgetId} in mural ${muralId}`
+                }, null, 2)
+              }
+            ],
+          };
+        }
+
+        case 'update-shape': {
+          const schema = z.object({
+            muralId: z.string().min(1),
+            widgetId: z.string().min(1),
+            updates: z.object({
+              x: z.number().optional(),
+              y: z.number().optional(),
+              width: z.number().optional(),
+              height: z.number().optional(),
+              shape: z.enum(['rectangle', 'circle', 'triangle', 'diamond']).optional(),
+              style: z.object({
+                backgroundColor: z.string().optional(),
+                borderColor: z.string().optional(),
+                borderWidth: z.number().optional()
+              }).optional()
+            })
+          });
+          
+          const { muralId, widgetId, updates } = schema.parse(args);
+          const updatedWidget = await muralClient.updateShape(muralId, widgetId, updates);
+          
+          return {
+            content: [
+              {
+                type: 'text',
+                text: JSON.stringify({
+                  widget: updatedWidget,
+                  muralId,
+                  widgetId,
+                  message: `Successfully updated shape ${widgetId} in mural ${muralId}`
+                }, null, 2)
+              }
+            ],
+          };
+        }
+
+        case 'update-mural-tag': {
+          const schema = z.object({
+            muralId: z.string().min(1),
+            tagId: z.string().min(1),
+            updates: z.object({
+              name: z.string().min(1).optional(),
+              color: z.string().optional()
+            })
+          });
+          
+          const { muralId, tagId, updates } = schema.parse(args);
+          const updatedTag = await muralClient.updateMuralTag(muralId, tagId, updates);
+          
+          return {
+            content: [
+              {
+                type: 'text',
+                text: JSON.stringify({
+                  tag: updatedTag,
+                  muralId,
+                  tagId,
+                  message: `Successfully updated tag ${tagId} in mural ${muralId}`
+                }, null, 2)
+              }
+            ],
+          };
+        }
+
+        case 'update-timer': {
+          const schema = z.object({
+            muralId: z.string().min(1),
+            action: z.enum(['pause', 'resume'])
+          });
+          
+          const { muralId, action } = schema.parse(args);
+          const updatedTimer = await muralClient.updateTimer(muralId, { action });
+          
+          return {
+            content: [
+              {
+                type: 'text',
+                text: JSON.stringify({
+                  timer: updatedTimer,
+                  muralId,
+                  action,
+                  message: `Successfully ${action}d timer in mural ${muralId}`
+                }, null, 2)
+              }
+            ],
+          };
+        }
+
+        case 'update-room-member-permissions': {
+          const schema = z.object({
+            roomId: z.string().min(1),
+            members: z.array(z.object({
+              userId: z.string().min(1),
+              permissions: z.array(z.enum(['read', 'write', 'admin'])).min(1)
+            })).min(1)
+          });
+          
+          const { roomId, members } = schema.parse(args);
+          await muralClient.updateRoomMemberPermissions(roomId, { members });
+          
+          return {
+            content: [
+              {
+                type: 'text',
+                text: JSON.stringify({
+                  roomId,
+                  membersUpdated: members.length,
+                  message: `Successfully updated permissions for ${members.length} member${members.length === 1 ? '' : 's'} in room ${roomId}`
+                }, null, 2)
+              }
+            ],
+          };
+        }
+
+        case 'update-mural-member-permissions': {
+          const schema = z.object({
+            muralId: z.string().min(1),
+            members: z.array(z.object({
+              userId: z.string().min(1),
+              permissions: z.array(z.enum(['read', 'write', 'comment'])).min(1)
+            })).min(1)
+          });
+          
+          const { muralId, members } = schema.parse(args);
+          await muralClient.updateMuralMemberPermissions(muralId, { members });
+          
+          return {
+            content: [
+              {
+                type: 'text',
+                text: JSON.stringify({
+                  muralId,
+                  membersUpdated: members.length,
+                  message: `Successfully updated permissions for ${members.length} member${members.length === 1 ? '' : 's'} in mural ${muralId}`
+                }, null, 2)
+              }
+            ],
+          };
+        }
+
+        case 'update-room': {
+          const schema = z.object({
+            roomId: z.string().min(1),
+            updates: z.object({
+              name: z.string().optional(),
+              description: z.string().optional()
+            }).refine(obj => Object.keys(obj).length > 0, {
+              message: "At least one update field must be provided"
+            })
+          });
+          
+          const { roomId, updates } = schema.parse(args);
+          await muralClient.updateRoom(roomId, updates);
+          
+          return {
+            content: [
+              {
+                type: 'text',
+                text: JSON.stringify({
+                  roomId,
+                  updates,
+                  message: `Successfully updated room ${roomId}`
+                }, null, 2)
+              }
+            ],
+          };
+        }
+
+        case 'update-mural': {
+          const schema = z.object({
+            muralId: z.string().min(1),
+            updates: z.object({
+              title: z.string().optional(),
+              description: z.string().optional()
+            }).refine(obj => Object.keys(obj).length > 0, {
+              message: "At least one update field must be provided"
+            })
+          });
+          
+          const { muralId, updates } = schema.parse(args);
+          const updatedMural = await muralClient.updateMural(muralId, updates);
+          
+          return {
+            content: [
+              {
+                type: 'text',
+                text: JSON.stringify({
+                  mural: updatedMural,
+                  muralId,
+                  updates,
+                  message: `Successfully updated mural ${muralId}`
                 }, null, 2)
               }
             ],
