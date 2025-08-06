@@ -293,8 +293,29 @@ export class MuralClient {
     try {
       // Extract scopes from the stored OAuth token (primary method)
       const tokens = await this.oauth.getStoredTokens();
-      if (tokens && tokens.scope) {
+      if (!tokens) {
+        return [];
+      }
+      
+      // First check if scopes are in the top-level scope field
+      if (tokens.scope) {
         return tokens.scope.split(' ').filter(scope => scope.trim() !== '');
+      }
+      
+      // If no top-level scope field, try to decode JWT access token
+      if (tokens.access_token) {
+        try {
+          // Decode JWT payload (without verification - just for scope extraction)
+          const payloadPart = tokens.access_token.split('.')[1];
+          if (payloadPart) {
+            const payload = JSON.parse(Buffer.from(payloadPart, 'base64url').toString());
+            if (payload.scopes && Array.isArray(payload.scopes)) {
+              return payload.scopes;
+            }
+          }
+        } catch (jwtError) {
+          console.warn('Failed to decode JWT for scope extraction:', jwtError);
+        }
       }
       
       // If no stored tokens or scope information, return empty array
