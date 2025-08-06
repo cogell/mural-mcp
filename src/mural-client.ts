@@ -1,4 +1,4 @@
-import type { MuralWorkspace, MuralWorkspacesResponse, RateLimitConfig } from './types.js';
+import type { MuralWorkspace, MuralWorkspacesResponse, MuralBoard, RateLimitConfig } from './types.js';
 import { MuralOAuth } from './oauth.js';
 import { MuralRateLimiter } from './rate-limiter.js';
 
@@ -177,6 +177,40 @@ export class MuralClient {
 
   async resetRateLimits(): Promise<void> {
     await this.rateLimiter.reset();
+  }
+
+  async getWorkspaceMurals(workspaceId: string): Promise<MuralBoard[]> {
+    try {
+      const response = await this.makeAuthenticatedRequest<any>(`/getworkspacemurals?workspaceId=${workspaceId}`);
+      // The API response structure may vary, handle both direct array and wrapped response
+      const murals = response.value || response.murals || response;
+      return Array.isArray(murals) ? murals : [];
+    } catch (error) {
+      console.error(`Failed to fetch murals for workspace ${workspaceId}:`, error);
+      throw error;
+    }
+  }
+
+  async getRoomMurals(roomId: string): Promise<MuralBoard[]> {
+    try {
+      const response = await this.makeAuthenticatedRequest<any>(`/getroommurals?roomId=${roomId}`);
+      // The API response structure may vary, handle both direct array and wrapped response
+      const murals = response.value || response.murals || response;
+      return Array.isArray(murals) ? murals : [];
+    } catch (error) {
+      console.error(`Failed to fetch murals for room ${roomId}:`, error);
+      throw error;
+    }
+  }
+
+  async getMural(muralId: string): Promise<MuralBoard> {
+    try {
+      const mural = await this.makeAuthenticatedRequest<MuralBoard>(`/murals/${muralId}`);
+      return mural;
+    } catch (error) {
+      console.error(`Failed to fetch mural ${muralId}:`, error);
+      throw error;
+    }
   }
 
   async debugWorkspacesAPI(): Promise<any> {

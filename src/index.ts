@@ -120,6 +120,51 @@ async function main() {
             properties: {},
             additionalProperties: false
           },
+        },
+        {
+          name: 'list-workspace-boards',
+          description: 'List all boards (murals) within a specific workspace',
+          inputSchema: {
+            type: 'object',
+            properties: {
+              workspaceId: {
+                type: 'string',
+                description: 'The unique identifier of the workspace'
+              }
+            },
+            required: ['workspaceId'],
+            additionalProperties: false
+          },
+        },
+        {
+          name: 'list-room-boards',
+          description: 'List all boards (murals) within a specific room',
+          inputSchema: {
+            type: 'object',
+            properties: {
+              roomId: {
+                type: 'string',
+                description: 'The unique identifier of the room'
+              }
+            },
+            required: ['roomId'],
+            additionalProperties: false
+          },
+        },
+        {
+          name: 'get-board',
+          description: 'Get detailed information about a specific board (mural)',
+          inputSchema: {
+            type: 'object',
+            properties: {
+              boardId: {
+                type: 'string',
+                description: 'The unique identifier of the board/mural'
+              }
+            },
+            required: ['boardId'],
+            additionalProperties: false
+          },
         }
       ],
     };
@@ -238,6 +283,74 @@ async function main() {
                     app: `${rateLimitStatus.app.tokensRemaining}/${rateLimitStatus.app.capacity} requests available (${rateLimitStatus.app.refillRate}/minute)`
                   }
                 }, null, 2)
+              }
+            ],
+          };
+        }
+
+        case 'list-workspace-boards': {
+          const schema = z.object({
+            workspaceId: z.string().min(1)
+          });
+          
+          const { workspaceId } = schema.parse(args);
+          const boards = await muralClient.getWorkspaceMurals(workspaceId);
+          
+          return {
+            content: [
+              {
+                type: 'text',
+                text: JSON.stringify({
+                  boards,
+                  count: boards.length,
+                  workspaceId,
+                  message: boards.length === 0 
+                    ? `No boards found in workspace ${workspaceId}` 
+                    : `Found ${boards.length} board${boards.length === 1 ? '' : 's'} in workspace`
+                }, null, 2)
+              }
+            ],
+          };
+        }
+
+        case 'list-room-boards': {
+          const schema = z.object({
+            roomId: z.string().min(1)
+          });
+          
+          const { roomId } = schema.parse(args);
+          const boards = await muralClient.getRoomMurals(roomId);
+          
+          return {
+            content: [
+              {
+                type: 'text',
+                text: JSON.stringify({
+                  boards,
+                  count: boards.length,
+                  roomId,
+                  message: boards.length === 0 
+                    ? `No boards found in room ${roomId}` 
+                    : `Found ${boards.length} board${boards.length === 1 ? '' : 's'} in room`
+                }, null, 2)
+              }
+            ],
+          };
+        }
+
+        case 'get-board': {
+          const schema = z.object({
+            boardId: z.string().min(1)
+          });
+          
+          const { boardId } = schema.parse(args);
+          const board = await muralClient.getMural(boardId);
+          
+          return {
+            content: [
+              {
+                type: 'text',
+                text: JSON.stringify(board, null, 2)
               }
             ],
           };

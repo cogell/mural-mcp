@@ -97,3 +97,20 @@ export interface RateLimitStatus {
   };
   lastUpdated: number;
 }
+
+export interface MuralBoard {
+  id: string;
+  title: string;
+  createdOn?: string;
+  updatedOn?: string;
+  createdBy?: {
+    id: string;
+    firstName?: string;
+    lastName?: string;
+    email?: string;
+  };
+  workspaceId?: string;
+  roomId?: string;
+  thumbnail?: string;
+  url?: string;
+}
